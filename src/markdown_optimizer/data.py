@@ -17,7 +17,9 @@ import pandas as pd
 from markdown_optimizer.config import CATEGORIES, FIRST_WEEK, HISTORY_WEEKS, N_SKUS, POLICY, ClearancePolicy
 
 YEAR_WEEKS = 52.1775
-NB_SIZE = 15.0  # negative binomial size; variance = mu + mu^2 / size
+# Negative binomial size (variance = mu + mu^2 / size). Chain-level weeks sum ~60 stores, which
+# leaves a coefficient of variation of about 16% on a high-volume SKU.
+NB_SIZE = 40.0
 
 HOLIDAYS = [
     "2023-01-01", "2023-04-09", "2023-11-23", "2023-12-25", "2023-12-31",
