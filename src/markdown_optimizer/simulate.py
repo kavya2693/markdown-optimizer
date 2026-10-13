@@ -25,14 +25,14 @@ def model_demand(coefs: pd.DataFrame, last_cpi: pd.Series) -> DemandFn:
         weeks = int(ev["weeks"])
         t = np.tile(np.arange(ev["start_t"], ev["start_t"] + weeks), len(depths))
         d = np.repeat(depths, weeks)
-        X = design(
+        x = design(
             t,
             ev["regular_price"] * (1 - d),
             np.full(len(t), last_cpi[ev["sku_id"]]),
             (d > 0).astype(float),
             np.zeros(len(t)),
         )
-        return predict(coefs.loc[ev["sku_id"]], X).reshape(len(depths), weeks)
+        return predict(coefs.loc[ev["sku_id"]], x).reshape(len(depths), weeks)
 
     return fn
 

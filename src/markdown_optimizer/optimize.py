@@ -76,7 +76,9 @@ def plan_events(events: pd.DataFrame, demand_fn: DemandFn, policy: ClearancePoli
     return pd.DataFrame(rows)
 
 
-def fixed_plan(events: pd.DataFrame, depth: float = FIXED_RULE_DEPTH, policy: ClearancePolicy = POLICY) -> pd.DataFrame:
+def fixed_plan(
+    events: pd.DataFrame, depth: float = FIXED_RULE_DEPTH, policy: ClearancePolicy = POLICY
+) -> pd.DataFrame:
     return pd.DataFrame(
         [
             _plan_row(pd.Series(ev._asdict()), np.full(policy.event_weeks, depth), np.nan, np.nan)

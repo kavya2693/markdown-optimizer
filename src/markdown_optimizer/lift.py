@@ -32,7 +32,9 @@ def _last_n_mean(n: int):  # type: ignore[no-untyped-def]
     return f
 
 
-def evaluate_lift(prepared: pd.DataFrame, coefs: pd.DataFrame, truth: pd.DataFrame, skus: pd.DataFrame) -> pd.DataFrame:
+def evaluate_lift(
+    prepared: pd.DataFrame, coefs: pd.DataFrame, truth: pd.DataFrame, skus: pd.DataFrame
+) -> pd.DataFrame:
     """One row per historical promotion week, with estimated and true baselines and margins."""
     df = prepared.copy()
     df["naive_baseline"] = naive_baseline(df)
@@ -52,7 +54,9 @@ def evaluate_lift(prepared: pd.DataFrame, coefs: pd.DataFrame, truth: pd.DataFra
     cpi = promo["competitor_index"].to_numpy()
     hol = promo["holiday"].to_numpy()
     zeros = np.zeros(len(promo))
-    promo["true_baseline"] = np.exp(true_log_mu(params, t, promo["regular_price"].to_numpy(), cpi, zeros, zeros, hol))
+    promo["true_baseline"] = np.exp(
+        true_log_mu(params, t, promo["regular_price"].to_numpy(), cpi, zeros, zeros, hol)
+    )
     promo["true_promo_mean"] = np.exp(
         true_log_mu(params, t, promo["price"].to_numpy(), cpi, np.ones(len(promo)), zeros, hol)
     )
@@ -60,7 +64,9 @@ def evaluate_lift(prepared: pd.DataFrame, coefs: pd.DataFrame, truth: pd.DataFra
     cost = skus.set_index("sku_id").loc[promo["sku_id"], "unit_cost"].to_numpy()
     reg_margin = promo["regular_price"].to_numpy() - cost
     promo_margin = promo["price"].to_numpy() - cost
-    promo["true_incremental_margin"] = promo_margin * promo["true_promo_mean"] - reg_margin * promo["true_baseline"]
+    promo["true_incremental_margin"] = (
+        promo_margin * promo["true_promo_mean"] - reg_margin * promo["true_baseline"]
+    )
     for name in ("model", "naive"):
         promo[f"{name}_incremental_margin"] = (
             promo_margin * promo["units"].to_numpy() - reg_margin * promo[f"{name}_baseline"].to_numpy()

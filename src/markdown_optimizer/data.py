@@ -260,7 +260,7 @@ def _events(
                     "start_t": start,
                     "start_week": week_start(np.array([start])).strftime("%Y-%m-%d")[0],
                     "weeks": policy.event_weeks,
-                    "opening_stock": int(round(cover * mu.mean())),
+                    "opening_stock": round(float(cover * mu.mean())),
                     "regular_price": float(last_regular[i]),
                     "unit_cost": unit_cost,
                     "salvage_value": round(unit_cost * policy.salvage_share_of_cost, 2),

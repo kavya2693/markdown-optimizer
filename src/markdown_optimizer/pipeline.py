@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
 
 from markdown_optimizer.config import POLICY
@@ -54,7 +53,9 @@ def elasticity_error(est: dict[str, pd.DataFrame], truth: pd.DataFrame) -> tuple
                 "gamma_mae": gerr.abs().mean(),
             }
         )
-        per_sku.append(pd.DataFrame({"estimator": name, "beta_hat": t["beta"], "beta_true": tr.loc[t.index, "beta"]}))
+        per_sku.append(
+            pd.DataFrame({"estimator": name, "beta_hat": t["beta"], "beta_true": tr.loc[t.index, "beta"]})
+        )
     return pd.DataFrame(rows), pd.concat(per_sku).reset_index()
 
 
@@ -100,7 +101,8 @@ def run(ds: Dataset, draws: int = 400) -> Results:
     )[["policy", "event_id", "margin", "sell_through"]]
 
     plan = plans["partial_pooling"].merge(
-        outcomes["partial_pooling"][["event_id", "sku_id", "margin", "sell_through"]], on=["event_id", "sku_id"]
+        outcomes["partial_pooling"][["event_id", "sku_id", "margin", "sell_through"]],
+        on=["event_id", "sku_id"],
     )
     plan = plan.merge(
         outcomes["fixed_30"][["event_id", "sku_id", "margin", "sell_through"]].rename(

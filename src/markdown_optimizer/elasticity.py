@@ -151,7 +151,9 @@ def fit_controls(prepared: pd.DataFrame, elasticities: pd.DataFrame) -> pd.DataF
         b, c = float(el.at[sku, "beta"]), float(el.at[sku, "gamma"])
         offset = b * g["log_price"].to_numpy() + c * g["log_cpi"].to_numpy()
         fit = fit_robust(g[CONTROL_COLS].to_numpy(), g["units"].to_numpy(dtype=float), offset)
-        rows.append({"sku_id": sku, "log_price": b, "log_cpi": c, **dict(zip(CONTROL_COLS, fit.coef, strict=True))})
+        rows.append(
+            {"sku_id": sku, "log_price": b, "log_cpi": c, **dict(zip(CONTROL_COLS, fit.coef, strict=True))}
+        )
     return pd.DataFrame(rows).set_index("sku_id")[PRICE_COLS + CONTROL_COLS]
 
 
