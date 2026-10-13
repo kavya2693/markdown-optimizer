@@ -1,0 +1,4 @@
+comparison,margin_difference,ci95_halfwidth
+partial_pooling - no_pooling,1045.9300499999981,1042.066400642696
+partial_pooling - complete_pooling,3169.3497749999988,1892.7273934949817
+partial_pooling - partial_pooling_no_competitor,1531.498924999999,1361.5134403947336

@@ -1,0 +1,20 @@
+{
+  "seed": 7,
+  "beta_mae_no_pooling": 0.3854364260178136,
+  "beta_mae_partial_pooling": 0.2791605025493722,
+  "baseline_wape_model": 0.03685692372129345,
+  "baseline_wape_naive": 0.1298573810115221,
+  "margin_fixed_30": 18877.14955,
+  "margin_partial_pooling": 56627.59594999999,
+  "margin_oracle": 62373.26895,
+  "margin_no_pooling": 55581.6659,
+  "margin_complete_pooling": 53458.246175,
+  "margin_best_blanket_depth": 42760.77675,
+  "best_blanket_depth": 0.19999999999999998,
+  "oracle_headroom_captured": 0.8679037790208016,
+  "sell_through_fixed_30": 0.9304989839821091,
+  "sell_through_partial_pooling": 0.9195749327384803,
+  "hit_target_fixed_30": 0.9209083333333332,
+  "hit_target_partial_pooling": 0.9058083333333333,
+  "sell_through_target": 0.75
+}
