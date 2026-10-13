@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from markdown_optimizer.config import POLICY
+from markdown_optimizer.config import LADDER, POLICY
 from markdown_optimizer.data import Dataset
 from markdown_optimizer.elasticity import estimate, fit_controls
 from markdown_optimizer.features import prepare
@@ -80,6 +80,13 @@ def run(ds: Dataset, draws: int = 400) -> Results:
         "oracle": plan_events(events, oracle_demand(truth, future)),
     }
     outcomes = {name: simulate(events, plan, truth, future, draws=draws) for name, plan in plans.items()}
+
+    # The arm most likely to embarrass the optimiser: one blanket depth for every SKU, chosen
+    # with hindsight on the true outcomes. If per-SKU depths barely beat it, the gain over the
+    # 30% rule came from picking a better blanket number, not from the elasticities.
+    blanket = {d: simulate(events, fixed_plan(events, d), truth, future, draws=draws) for d in LADDER[1:]}
+    best = max(blanket, key=lambda d: blanket[d]["margin"].sum())
+    outcomes["best_blanket_depth_hindsight"] = blanket[best]
     summary = summarise(outcomes)
     pooling = pd.DataFrame(
         [
@@ -125,6 +132,10 @@ def headline(res: Results) -> dict[str, float]:
         "margin_fixed_30": float(s.at["fixed_30", "promotional_margin"]),
         "margin_partial_pooling": float(s.at["partial_pooling", "promotional_margin"]),
         "margin_oracle": float(s.at["oracle", "promotional_margin"]),
+        "margin_no_pooling": float(s.at["no_pooling", "promotional_margin"]),
+        "margin_complete_pooling": float(s.at["complete_pooling", "promotional_margin"]),
+        "margin_best_blanket_depth": float(s.at["best_blanket_depth_hindsight", "promotional_margin"]),
+        "best_blanket_depth": float(s.at["best_blanket_depth_hindsight", "mean_depth"]),
         "oracle_headroom_captured": float(s.at["partial_pooling", "oracle_headroom_captured"]),
         "sell_through_fixed_30": float(s.at["fixed_30", "sell_through"]),
         "sell_through_partial_pooling": float(s.at["partial_pooling", "sell_through"]),
