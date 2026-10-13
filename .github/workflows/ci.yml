@@ -34,3 +34,12 @@ jobs:
         run: |
           uv run python scripts/generate_data.py
           uv run markdown-optimizer --out ci-outputs --draws 100
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: build image
+        run: docker build -t markdown-optimizer .
+      - name: run the study in the image
+        run: docker run --rm markdown-optimizer
