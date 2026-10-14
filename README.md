@@ -8,6 +8,176 @@ How deep to mark down each slow-moving grocery SKU in a clearance event, worked 
 own price elasticity instead of a blanket 30% off, and checked against demand where the right
 answer is known.
 
+[![89-second silent walkthrough: the clearance problem, how elasticity drives each markdown, the architecture, the markdown sheet and the results](docs/demo/demo.gif)](docs/demo/demo.mp4)
+
+*89-second silent walkthrough. Click for the full video ([MP4, 6 MB](docs/demo/demo.mp4)).*
+
+📄 **Audit report:** every figure and assumption in the video, traced to its source — [PDF](docs/demo/AUDIT_REPORT.pdf) · [Word](docs/demo/AUDIT_REPORT.docx) · [Markdown](docs/demo/AUDIT_REPORT.md)
+
+## At a glance
+
+| | |
+|---|---|
+| **Problem** | A grocery chain clears 100 slow-moving SKUs per event with a blanket 30% off. It is too deep on price-sensitive SKUs (margin given away) and too shallow on insensitive ones (stock written off), and nobody can check a better plan because the counterfactual price was never charged. |
+| **Approach** | Per-SKU own-price and competitor elasticity from a Poisson GLM, shrunk towards the category mean by empirical Bayes; exhaustive search over all 210 non-decreasing markdown paths per SKU-event for the best margin that still clears 75% of stock; every plan scored on the true demand curve with the competitor prices that actually happened. |
+| **Result** | Promotional margin **56,628 against 18,877** for the 30% rule (**+37,750 ± 8,252**, paired over 300 SKU-events), **87% of the gap** to a planner that knows the true curve. Partial pooling cuts elasticity error **0.385 to 0.279 MAE** (-28%) against fitting each SKU alone. |
+| **What didn't win** | Better elasticities barely move the money: pooling adds **1,046 ± 1,042** margin, under 2% of the total. A single 20% depth chosen in hindsight gets 63% of the gain with no model. The plan sells through less than the 30% rule (92.0% vs 93.0%) and hits the clearance target slightly less often (90.6% vs 92.1%). |
+
+## Architecture
+
+![Architecture walkthrough: sales history, the elasticity models, the ladder search and the scorer that runs on the true demand curve](docs/demo/architecture.gif)
+
+```mermaid
+flowchart LR
+    subgraph SRC["Sources"]
+        GEN["Seeded generator<br/>scripts/generate_data.py<br/>data.generate"]
+        SALES[("sales.csv<br/>156 weeks x 400 SKUs<br/>gaps, stockouts, bulk orders")]
+        EVT[("events.csv<br/>3 events x 100 SKUs")]
+        SKU[("skus.csv<br/>unit cost, regular price")]
+        TRUTH[("data/truth/<br/>sku_params.csv<br/>future_competitor_index.csv")]
+    end
+
+    subgraph FEAT["Data and features"]
+        PREP["Clean + design matrix<br/>features.prepare"]
+    end
+
+    subgraph MOD["Models"]
+        GLM["Per-SKU Poisson GLM, IRLS<br/>outlier refit<br/>elasticity.fit_unpooled"]
+        EB["Empirical-Bayes shrink<br/>DerSimonian-Laird per category<br/>elasticity.shrink"]
+        CTRL["Refit controls, slope fixed<br/>elasticity.fit_controls"]
+    end
+
+    subgraph DEC["Decision and optimiser"]
+        CPI["Competitor index held<br/>at last observed value<br/>pipeline.run"]
+        MD["Planner's demand curve<br/>simulate.model_demand"]
+        LAD["210 ladder paths, scored<br/>optimize.ladder_paths<br/>optimize.score_paths"]
+        CH["Best margin with<br/>75% sell-through<br/>optimize.choose"]
+        FIX["Fixed and blanket rules<br/>optimize.fixed_plan"]
+        ORC["Oracle planner<br/>simulate.oracle_demand"]
+    end
+
+    subgraph EVAL["Evaluation"]
+        SIM["Scorer on the true curve<br/>400 paired draws<br/>simulate.simulate"]
+        ERR["Elasticity error vs truth<br/>pipeline.elasticity_error"]
+        LIFT["Promotion lift vs<br/>true counterfactual<br/>lift.evaluate_lift"]
+        SUM["Paired 95% intervals<br/>simulate.summarise"]
+    end
+
+    subgraph OUT["Outputs"]
+        REP[("outputs/<br/>report.md · results.json<br/>markdown_plan.csv · *.csv")]
+    end
+
+    GEN --> SALES & EVT & SKU & TRUTH
+    SALES -->|"SKU-weeks"| PREP
+    PREP -->|"log price, log competitor index,<br/>promo, dip, Fourier, holiday, trend"| GLM
+    GLM -->|"beta, gamma + standard errors"| EB
+    EB -->|"pooled beta, gamma"| CTRL
+    PREP -->|"non-stockout rows"| CTRL
+    CTRL -->|"coefficients per SKU"| MD
+    CPI --> MD
+    EVT -->|"stock, cost, salvage, start week"| LAD
+    MD -->|"expected units (7 rungs x 4 weeks)"| LAD
+    LAD -->|"margin, sell-through per path"| CH
+    CH -.->|"no path reaches 75%:<br/>take highest sell-through"| CH
+    CH -->|"depth_w1..w4"| SIM
+    FIX -->|"depth_w1..w4"| SIM
+    ORC -->|"depth_w1..w4"| SIM
+    TRUTH -->|"true params, realised competitor prices"| SIM
+    TRUTH --> ORC
+    TRUTH --> ERR
+    TRUTH --> LIFT
+    EB --> ERR
+    CTRL --> LIFT
+    SKU --> LIFT
+    SIM -->|"margin, sell-through per SKU-event"| SUM
+    PREP -.->|"stockout weeks dropped,<br/>competitor gaps carried forward"| GLM
+    SUM --> REP
+    ERR --> REP
+    LIFT --> REP
+
+    classDef data fill:#7fa8ff,stroke:#3d6fd9,color:#0b1020
+    classDef model fill:#b9a2ff,stroke:#7a5fd6,color:#0b1020
+    classDef decision fill:#3fd8a8,stroke:#1f9c76,color:#0b1020
+    classDef evaluation fill:#f2c46d,stroke:#b8902f,color:#0b1020
+    classDef risk fill:#ff8a73,stroke:#cc5640,color:#0b1020
+
+    class GEN,SALES,EVT,SKU,PREP,REP data
+    class GLM,EB,CTRL,MD model
+    class LAD,CH,FIX,ORC decision
+    class SIM,ERR,LIFT,SUM evaluation
+    class TRUTH,CPI risk
+```
+
+Solid edges are the data flow of one run; dotted edges are the cleaning and fallback paths. Red
+nodes mark the boundary the planner cannot see across: the true parameters and realised
+competitor prices are read only by the oracle and the evaluation code, and the planner works
+from a competitor index frozen at its last observed value.
+
+### Components
+
+| Component | Responsibility | File |
+|---|---|---|
+| Data generator | Chain-level sales history with promotions, competitor deals, stockouts, bulk orders and gaps; clearance events; the true parameters | [`scripts/generate_data.py`](scripts/generate_data.py), [`src/markdown_optimizer/data.py`](src/markdown_optimizer/data.py) |
+| Policy and constants | Categories, discount ladder (0-60%), 30% rule, event length, 75% sell-through target, salvage at 30% of cost | [`src/markdown_optimizer/config.py`](src/markdown_optimizer/config.py) |
+| Features | Competitor gap fill, post-promotion flag on the full week grid, two Fourier harmonics, holiday, trend | [`src/markdown_optimizer/features.py`](src/markdown_optimizer/features.py) |
+| Elasticity | Poisson GLM by IRLS with outlier refit; no, complete and partial pooling; control refit with the pooled slope as an offset | [`src/markdown_optimizer/elasticity.py`](src/markdown_optimizer/elasticity.py) |
+| Promotion lift | Model and four-week pre-period baselines; incremental margin of each past promotion, scored on the true counterfactual | [`src/markdown_optimizer/lift.py`](src/markdown_optimizer/lift.py) |
+| Optimiser | Enumerates non-decreasing ladder paths, scores margin and sell-through, applies the constraint and the fallback | [`src/markdown_optimizer/optimize.py`](src/markdown_optimizer/optimize.py) |
+| Scorer | Planner, oracle and true demand curves; paired draws per SKU-event; paired intervals and headroom captured | [`src/markdown_optimizer/simulate.py`](src/markdown_optimizer/simulate.py) |
+| Orchestrator | Every estimator and policy, the hindsight blanket arm, the seed sweep, and every file in `outputs/` | [`src/markdown_optimizer/pipeline.py`](src/markdown_optimizer/pipeline.py), [`src/markdown_optimizer/cli.py`](src/markdown_optimizer/cli.py) |
+
+### Design decisions
+
+| Decision | Options considered | Chosen | Trade-off |
+|---|---|---|---|
+| Demand model | OLS on log(units + 1); Poisson GLM | Poisson GLM with log link by IRLS, quasi-Poisson standard errors, one outlier refit ([ADR-0001](docs/adr/0001-glm-with-empirical-bayes-and-exhaustive-ladder-search.md)) | No constant to bias thin SKUs towards zero; assumes the constant-elasticity form, which the evaluation cannot challenge |
+| Sharing strength across SKUs | Each SKU alone; category mean; empirical-Bayes shrinkage; full hierarchical Bayes (PyMC / Stan) | Empirical Bayes, DerSimonian-Laird within category | Same shrinkage behaviour in well under a minute with numpy only; no posterior, which nothing downstream uses |
+| Markdown search | MILP solver; reinforcement-learning pricing; exhaustive enumeration | All 210 non-decreasing paths over 7 rungs and 4 weeks | Exact, dependency-free and explainable to a merchant; would not scale to many more rungs or weeks without a solver |
+| Objective and constraint | Maximise sell-through; maximise margin; margin with a sell-through floor | Margin including the leftover write-down, subject to 75% expected sell-through | Plans right up to the line on expected demand, so noise pushes some events under it (90.6% hit rate vs 92.1%) |
+| How plans are judged | Score on the fitted model; score on the true curve | True curve with realised competitor prices and paired demand draws; never the model that made the plan | Only possible with known ground truth; it cannot catch a wrong functional form because generator and estimator share one |
+| Seasonality | 52 week-of-year dummies; Fourier terms | Two Fourier harmonics on the week index | Keeps a third of the degrees of freedom on three years of history; cannot fit a sharp one-week spike other than the holiday flag |
+
+### Data contracts
+
+| Stage | Input | Output |
+|---|---|---|
+| Generator | seed, SKU count, `ClearancePolicy` | `sales.csv`: `week` (date), `t` (int), `sku_id, category` (str), `regular_price, discount, price` (float), `promo` (0/1), `competitor_index` (float, 2% missing), `units` (int), `stockout` (0/1); `events.csv`: `event_id, sku_id, category, start_t, start_week, weeks, opening_stock, regular_price, unit_cost, salvage_value`; `skus.csv`: `sku_id, category, price_ref, unit_cost, regular_price`; `truth/`: per-SKU `beta, gamma, delta, dip, ...` and the event-period competitor index |
+| Features | `sales.csv` rows | same rows plus `log_price, log_cpi, const, post_promo, sin1, cos1, sin2, cos2, holiday, trend` (float) |
+| Elasticity | prepared rows | one table per estimator: `sku_id, category, n_weeks, n_promo_weeks, mean_units, beta, gamma` |
+| Control refit | prepared rows, one elasticity table | coefficients indexed by `sku_id`: `log_price, log_cpi, const, promo, post_promo, sin1..cos2, holiday, trend` |
+| Planner | event row, depth vector | expected units, array `(n_rungs, n_weeks)`; plan rows `event_id, sku_id, depth_w1..depth_w4, planned_margin, planned_sell_through` |
+| Scorer | events, plan, true params, realised competitor index | per SKU-event `margin, units_sold, sell_through, hit_target, mean_depth` (means over draws); summarised to `markdown_summary.csv` |
+
+### Failure modes and fallbacks
+
+| Failure | What the code does |
+|---|---|
+| Store-week file missing (1% of SKU-weeks) | The row is absent and the fit uses the weeks that exist. The post-promotion flag is computed from the full set of promotion weeks, so a missing row does not hide the week after a promotion. |
+| Competitor price missing (2% of rows) | Carried forward within the SKU, then back-filled at the start of the history. |
+| Stockout week | Dropped from every fit, because it records what was on the shelf rather than what was wanted. |
+| Bulk order or outlier | Rows with a Pearson residual above 5 are dropped and the GLM is refitted once; if that would leave too few rows, the first fit is kept. |
+| SKU with almost no price history | Empirical Bayes pulls it towards its category mean in proportion to its standard error. If the between-SKU variance comes out as zero, every SKU in the category gets the mean. |
+| No markdown path reaches 75% expected sell-through | The path with the highest sell-through is chosen, because the stock has to go regardless; the shortfall shows in the hit rate rather than being hidden. |
+| Competitor prices during the event are unknown | The planner holds the last observed index. Competitor reaction to our markdowns is not modelled; this is listed in the limitations. |
+| Elasticity model degrades over time | Not handled. Estimates are refitted on each run and are not monitored for drift. |
+| Solver or LLM timeout | Not applicable: the search enumerates a fixed 210 paths per SKU-event, and there is no solver, model server or network call. |
+
+### Path to production
+
+This is a mapping of each local piece to what would replace it in a deployed system, not a
+description of one that exists.
+
+| Here | Production equivalent |
+|---|---|
+| Seeded generator writing CSVs to `data/` | Weekly POS sales, price and promotion history and stock positions in a warehouse (BigQuery, Snowflake or Redshift), partitioned by week |
+| Generated competitor index | A competitor price-check feed joined by SKU and week, with its own freshness check |
+| `make run` on a laptop | Two scheduled jobs in Airflow or Step Functions: a weekly elasticity refit, and a plan job triggered when a clearance event is created |
+| Per-SKU IRLS loop in one process | The same code fanned out by category (Ray, Spark or one container job per category on Cloud Run Jobs / AWS Batch) |
+| Elasticity tables in memory | Versioned elasticity tables in a registry (MLflow, Vertex AI or SageMaker), promoted only if out-of-sample demand error does not get worse |
+| Scorer on the true demand curve | A store-split test: optimised depths in a random half of stores, the 30% rule in the rest, margin and sell-through compared per event |
+| `outputs/markdown_plan.csv` | Recommended depths pushed to the pricing system for merchant approval, then to shelf-label printing |
+| Monitoring (not built) | Weekly sell-through during an event against the plan's expectation; elasticity drift by category; share of events falling back to the highest-sell-through path; mid-event re-plan when a SKU runs behind |
+
 ## The problem
 
 A grocery chain ends every season with SKUs it overbought: holiday confectionery, a snack
