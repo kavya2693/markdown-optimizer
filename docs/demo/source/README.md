@@ -15,7 +15,7 @@ Everything needed to rebuild the silent walkthrough (`docs/demo/demo.mp4`) and t
 | `compositions/s03-architecture.html` | Slide 05, the layered architecture diagram (node table `N`, wire table `W`) |
 | `compositions/s04-running.html` | Slide 06, elasticity scatter and margin per event (data injected by `tools/inject_running.py`) |
 | `compositions/value.html` | Slide 07, the markdown plan sheet and shelf scene (data injected by `tools/inject_sheet.py`) |
-| `compositions/s05-results.html`, `s06-twist.html`, `s07-end.html` | Slides 08-10, results, what didn't win, end card |
+| `compositions/s05-results.html`, `s06-twist.html`, `s07-end.html` | Slides 08-10, results, lesson and fix, end card |
 | `assets/markdown_sheet.json` | Clearance event E1 markdown sheet, exported by `tools/export_markdown_sheet.py` |
 | `assets/plan-heatmap.png` | End-card background: `outputs/markdown_plan.csv` drawn as a heatmap by `tools/plan_heatmap.py` |
 | `audit/facts.yaml` | Every figure (F-xx), assumption (A-xx), slide text and check expression used by the report |
@@ -57,7 +57,7 @@ python3 docs/demo/source/tools/inject_sheet.py docs/demo/source/assets/markdown_
 python3 docs/demo/source/tools/inject_running.py . docs/demo/source/compositions/s04-running.html
 python3 docs/demo/source/tools/plan_heatmap.py outputs/markdown_plan.csv docs/demo/source/assets/plan-heatmap.png
 
-# 3. render (88.8 s, 1920x1080, 30 fps, silent) and compress
+# 3. render (91.4 s, 1920x1080, 30 fps, silent) and compress
 cd docs/demo/source
 npx --yes hyperframes@0.8.156 check
 npx --yes hyperframes@0.8.156 render -f 30 -q looks -o renders/markdown-optimizer-master.mp4

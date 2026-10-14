@@ -8,7 +8,7 @@
            person using it (right). Data is inlined by tools/inject_sheet.py between the SHEET markers. */
         #value-root {
           position: absolute; inset: 0;
-          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #6b7280; --w-line: #d1d5db; --w-faint: #f3f4f6;
+          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #4b5563; --w-line: #d1d5db; --w-faint: #f3f4f6;
           --w-data: #d97706; --w-model: #6d3cf0; --w-tools: #1f8fa8; --w-risk: #dc2b4a; --w-opt: #0f9f6e;
           color: var(--w-ink); font-family: Inter, "Helvetica Neue", sans-serif;
         }
@@ -22,12 +22,12 @@
           position: absolute; left: 120px; top: 124px; font-family: Montserrat, sans-serif; font-weight: 900;
           font-size: 68px; letter-spacing: -0.02em; white-space: nowrap;
         }
-        #value-root .ttl em { font-style: normal; color: var(--w-opt); }
+        #value-root .ttl em { font-style: normal; color: #047857; }
         #value-root .uline { position: absolute; left: 124px; top: 222px; width: 120px; height: 10px; border-radius: 5px; background: var(--w-opt); transform-origin: left center; }
 
         /* sheet */
         #value-root .sheet {
-          position: absolute; left: 120px; top: 280px; width: 1080px; height: 640px; border: 3px solid var(--w-line);
+          position: absolute; left: 120px; top: 300px; width: 1080px; height: 620px; border: 3px solid var(--w-line);
           border-radius: 24px; background: #fff; box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08); overflow: hidden;
         }
         #value-root .sheet-head {
@@ -36,29 +36,29 @@
         }
         #value-root .sheet-head span:last-child { color: #6ee7b7; }
         #value-root .row {
-          position: relative; display: flex; align-items: center; height: 66px; padding: 0 22px;
-          font-family: "JetBrains Mono", monospace; font-size: 21px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
+          position: relative; display: flex; align-items: center; height: 62px; padding: 0 22px;
+          font-family: "JetBrains Mono", monospace; font-size: 22px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
         }
-        #value-root .row.hdr { height: 54px; font-size: 18px; font-weight: 700; letter-spacing: 0.06em; color: var(--w-mute); background: #fafafa; }
+        #value-root .row.hdr { height: 54px; font-size: 22px; font-weight: 700; letter-spacing: 0.02em; color: var(--w-mute); background: #fafafa; }
         #value-root .row .tint { position: absolute; inset: 0; opacity: 0; }
         #value-root .c { position: relative; white-space: nowrap; }
-        #value-root .c1 { width: 126px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        #value-root .c1 { width: 128px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
         #value-root .c1 i { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--w-line); }
-        #value-root .c2 { width: 206px; font-family: Inter, sans-serif; font-size: 20px; color: var(--w-soft); }
-        #value-root .c3 { width: 84px; text-align: right; padding-right: 12px; }
-        #value-root .c4 { width: 76px; text-align: right; padding-right: 16px; color: var(--w-model); }
-        #value-root .wk { width: 62px; display: flex; justify-content: center; }
+        #value-root .c2 { width: 216px; font-family: Inter, sans-serif; font-size: 22px; color: var(--w-soft); }
+        #value-root .c3 { width: 78px; text-align: right; padding-right: 12px; }
+        #value-root .c4 { width: 80px; text-align: right; padding-right: 12px; color: var(--w-model); }
+        #value-root .wk { width: 58px; display: flex; justify-content: center; }
         #value-root .wk b {
           display: block; width: 54px; height: 34px; border-radius: 8px; text-align: center; line-height: 34px;
-          font-size: 19px; font-weight: 700; color: #065f46;
+          font-size: 22px; font-weight: 700; color: #064e3b;
         }
-        #value-root .c6 { width: 80px; text-align: right; }
-        #value-root .c7 { width: 96px; text-align: right; font-weight: 700; color: var(--w-opt); }
-        #value-root .c8 { width: 96px; text-align: right; color: var(--w-mute); }
-        #value-root .row.hdr .wk { font-size: 18px; }
+        #value-root .c6 { width: 78px; text-align: right; }
+        #value-root .c7 { width: 108px; text-align: right; font-weight: 700; color: #047857; }
+        #value-root .c8 { width: 110px; text-align: right; color: var(--w-mute); }
+        #value-root .row.hdr .wk { font-size: 22px; }
         #value-root .row.hdr .c4, #value-root .row.hdr .c7 { color: var(--w-mute); }
-        #value-root .neg { color: var(--w-risk) !important; }
-        #value-root .more { padding: 14px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 20px; color: var(--w-mute); }
+        #value-root .neg { color: #be123c !important; }
+        #value-root .more { padding: 12px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 22px; color: var(--w-mute); }
         #value-root .totals {
           position: absolute; left: 0; bottom: 0; width: 100%; height: 66px; display: flex; align-items: center; gap: 14px; padding: 0 30px;
           background: #ecfdf5; border-top: 2px solid #a7f3d0; font-size: 23px; font-weight: 700; color: #065f46; white-space: nowrap;
@@ -67,17 +67,19 @@
         #value-root .totals svg { position: absolute; left: 6px; top: 6px; width: 16px; height: 16px; }
 
         /* scene */
-        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); white-space: nowrap; }
+        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); white-space: nowrap; }
         #value-root .store {
-          position: absolute; left: 1240px; top: 312px; width: 590px; height: 470px; border-radius: 24px; border: 3px solid var(--w-line);
+          position: absolute; left: 1240px; top: 332px; width: 590px; height: 470px; border-radius: 24px; border: 3px solid var(--w-line);
           background: #fbfbfc;
         }
-        #value-root svg.layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #value-root svg.layer { position: absolute; left: 0; top: 20px; width: 1920px; height: 1080px; overflow: visible; }
         #value-root svg text { font-family: "JetBrains Mono", monospace; }
         #value-root .caption {
           position: absolute; left: 120px; top: 950px; width: 1700px; font-size: 30px; font-weight: 700; color: var(--w-ink);
         }
-        #value-root .caption span { color: var(--w-opt); }
+        #value-root .caption span { color: #047857; }
+        #value-root .subt { position: absolute; left: 120px; top: 248px; width: 1680px; font-size: 26px; font-weight: 500; color: var(--w-soft); }
+        #value-root .subt b { color: var(--w-ink); }
       </style>
 
       <div id="value-root" data-composition-id="value" data-width="1920" data-height="1080">
@@ -85,11 +87,12 @@
           <div class="kick" id="va-kick">07 · END-USER VALUE</div>
           <div class="ttl" id="va-ttl">What the <em>pricing analyst</em> gets</div>
           <div class="uline" id="va-ul"></div>
+          <div class="subt" id="va-sub"><b>W1–W4</b> = each week's discount. <b>ELAST</b> = how much price moves its sales. <b>MARGIN</b> vs 30% OFF: higher is better.</div>
 
           <div class="sheet" id="va-sheet">
             <div class="sheet-head"><span id="va-head-l">MARKDOWN PLAN</span><span id="va-head-r"></span></div>
             <div class="row hdr" id="va-hdr">
-              <div class="c c1">SKU</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--w-mute)">CATEGORY</div>
+              <div class="c c1">SKU</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--w-mute)">CATEGORY</div>
               <div class="c c3">STOCK</div><div class="c c4">ELAST</div>
               <div class="c wk" id="va-h1">W1</div><div class="c wk" id="va-h2">W2</div><div class="c wk" id="va-h3">W3</div><div class="c wk" id="va-h4">W4</div>
               <div class="c c6">SOLD*</div><div class="c c7">MARGIN</div><div class="c c8">30% OFF</div>
@@ -99,7 +102,7 @@
             <div class="totals" id="va-totals"></div>
           </div>
 
-          <div class="scene-lab" id="va-lab" style="left: 1240px; top: 280px">STORE SHELF · EXPECTED SALES</div>
+          <div class="scene-lab" id="va-lab" style="left: 1240px; top: 300px">STORE SHELF · EXPECTED % SOLD</div>
           <div class="store" id="va-store"></div>
           <svg class="layer" id="va-svg" viewBox="0 0 1920 1080"></svg>
 
@@ -115,6 +118,7 @@
           const CONFIG = {
             duration: 13.0,
             colors: ["#6d3cf0", "#d97706", "#1f8fa8", "#dc2b4a"], // one per SKU on the shelf
+            textColors: ["#6d3cf0", "#b45309", "#0e7490", "#be123c"], // same order, darkened to >= 4.5:1 on white for text
             cols: [1380, 1495, 1610, 1725], // shelf column left edges (width 92)
             colW: 92,
             units: 10, // boxes per SKU on the shelf = its opening stock
@@ -130,12 +134,13 @@
             (parent || svg).appendChild(n);
             return n;
           };
-          const t = (parent, x, y, s, o) => { const n = el("text", Object.assign({ x, y, "font-size": 20, fill: "#111827" }, o || {}), parent); n.textContent = s; return n; };
+          const t = (parent, x, y, s, o) => { const n = el("text", Object.assign({ x, y, "font-size": 22, fill: "#111827" }, o || {}), parent); n.textContent = s; return n; };
           const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
           const fmt = (v) => Math.round(v).toLocaleString("en-US");
           const pct = (v) => Math.round(v * 100) + "%";
-          const depthBg = (d) => (d <= 0 ? "#f3f4f6" : "rgba(15,159,110," + (0.12 + d * 1.1).toFixed(2) + ")");
-          const depthInk = (d) => (d >= 0.3 ? "#ffffff" : d <= 0 ? "#6b7280" : "#065f46");
+          // deeper = darker green tint, capped so the dark-green number stays >= 4.5:1 on every tint
+          const depthBg = (d) => (d <= 0 ? "#f3f4f6" : "rgba(15,159,110," + (0.1 + d * 0.6).toFixed(2) + ")");
+          const depthInk = (d) => (d <= 0 ? "#4b5563" : "#064e3b");
           const tl = gsap.timeline({ paused: true });
           const D = CONFIG.duration;
 
@@ -169,23 +174,23 @@
           const paper = el("g", { id: "va-paper" }, person);
           el("rect", { x: P.x + 22, y: P.y - 18, width: 30, height: 38, rx: 4, fill: "#fff", stroke: "#111827", "stroke-width": 2.5 }, paper);
           [0, 1, 2].forEach((k) => el("line", { x1: P.x + 28, x2: P.x + 46, y1: P.y - 8 + k * 9, y2: P.y - 8 + k * 9, stroke: "#9ca3af", "stroke-width": 2 }, paper));
-          t(person, P.x, P.y + 82, "analyst", { "text-anchor": "middle", fill: "#6b7280" });
+          t(person, P.x, P.y + 82, "analyst", { "text-anchor": "middle", fill: "#4b5563" });
 
           // week ticker
           const weeks = el("g", { id: "va-weeks" });
-          t(weeks, 1380, 712, "WEEK", { "font-weight": 700, fill: "#6b7280" });
+          t(weeks, 1380, 712, "WEEK", { "font-weight": 700, fill: "#4b5563" });
           const wkCells = [0, 1, 2, 3].map((w) => {
             const g = el("g", {}, weeks);
             const r = el("rect", { x: 1450 + w * 92, y: 688, width: 80, height: 36, rx: 8, fill: "#f3f4f6", stroke: "#d1d5db", "stroke-width": 2 }, g);
-            const tx = t(g, 1490 + w * 92, 713, String(w + 1), { "text-anchor": "middle", "font-weight": 700, fill: "#6b7280" });
+            const tx = t(g, 1490 + w * 92, 713, String(w + 1), { "text-anchor": "middle", "font-weight": 700, fill: "#4b5563" });
             return { r, tx };
           });
 
           const anim = SHEET.rows.map((r, i) => ({ r, i })).filter((o) => o.r.animate >= 0).sort((a, b) => a.r.animate - b.r.animate);
           anim.forEach(({ r, i }, k) => {
-            const col = C.colors[k], x = C.cols[k], cw = C.colW;
+            const col = C.colors[k], tcol = C.textColors[k], x = C.cols[k], cw = C.colW;
             const g = el("g", { id: "va-prod" + k });
-            t(g, x + cw / 2, 374, r.sku_id, { "text-anchor": "middle", "font-weight": 700, fill: col });
+            t(g, x + cw / 2, 374, r.sku_id, { "text-anchor": "middle", "font-weight": 700, fill: tcol });
             // 10 boxes = opening stock, 2 wide x 5 high, top boxes leave first
             const boxes = [];
             for (let u = 0; u < C.units; u++) {
@@ -197,8 +202,8 @@
             el("rect", { x: x + 6, y: C.shelfY + 22, width: 80, height: 38, rx: 8, fill: "#fff", stroke: col, "stroke-width": 3 }, tag);
             // one label per state (full price, then each week's depth); only the current one is visible
             const states = ["full", ...r.depths.map((d) => (d > 0 ? "−" + pct(d) : "full"))];
-            const tagTxt = states.map((s0, j) => t(tag, x + cw / 2, C.shelfY + 48, s0, { "text-anchor": "middle", "font-weight": 700, fill: col, opacity: j === 0 ? 1 : 0 }));
-            const sold = t(g, x + cw / 2, C.shelfY + 94, pct(r.planned_sell_through) + " sold", { "text-anchor": "middle", "font-weight": 700, fill: "#0f9f6e", opacity: 0, id: "va-sold" + k });
+            const tagTxt = states.map((s0, j) => t(tag, x + cw / 2, C.shelfY + 48, s0, { "text-anchor": "middle", "font-weight": 700, fill: tcol, opacity: j === 0 ? 1 : 0 }));
+            const sold = t(g, x + cw / 2, C.shelfY + 94, pct(r.planned_sell_through), { "text-anchor": "middle", "font-weight": 700, fill: "#047857", opacity: 0, id: "va-sold" + k });
             const ok = el("g", { opacity: 0 }, g);
             el("circle", { cx: x + cw - 4, cy: C.shelfY + 22, r: 13, fill: "#0f9f6e" }, ok);
             el("path", { d: "M" + (x + cw - 10) + " " + (C.shelfY + 22.5) + "l4 4 8-8.5", fill: "none", stroke: "#fff", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, ok);
@@ -224,10 +229,10 @@
           // the analyst sets the tags each week; sheet column for that week lights up
           [0, 1, 2, 3].forEach((w) => {
             const at = C.week0 + w * C.weekLen;
-            tl.to(wkCells[w].r, { attr: { fill: "#0f9f6e", stroke: "#0f9f6e" }, duration: 0.25 }, at);
+            tl.to(wkCells[w].r, { attr: { fill: "#047857", stroke: "#047857" }, duration: 0.25 }, at);
             tl.to(wkCells[w].tx, { attr: { fill: "#ffffff" }, duration: 0.25 }, at);
-            tl.fromTo("#va-h" + (w + 1), { color: "#6b7280" }, { color: "#0f9f6e", duration: 0.25 }, at);
-            if (w > 0) tl.to("#va-h" + w, { color: "#6b7280", duration: 0.25 }, at);
+            tl.fromTo("#va-h" + (w + 1), { color: "#4b5563" }, { color: "#047857", duration: 0.25 }, at);
+            if (w > 0) tl.to("#va-h" + w, { color: "#4b5563", duration: 0.25 }, at);
             SHEET.rows.forEach((_, i) => tl.fromTo("#va-d" + i + "-" + w, { scale: 1 }, { scale: 1.15, duration: 0.18, yoyo: true, repeat: 1 }, at + i * 0.03));
             tl.fromTo("#va-paper", { rotation: 0 }, { rotation: -12, svgOrigin: P.x + 37 + " " + (P.y + 1), duration: 0.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, at - 0.1);
           });
@@ -243,6 +248,7 @@
           tl.fromTo("#va-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
           tl.fromTo("#va-ttl", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.55);
           tl.fromTo("#va-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.9);
+          tl.fromTo("#va-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.0);
           tl.fromTo("#va-sheet", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.8);
           SHEET.rows.forEach((_, i) => tl.fromTo("#va-r" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 1.3 + i * 0.3));
           tl.fromTo("#va-more", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3 + SHEET.rows.length * 0.3);
@@ -250,6 +256,8 @@
           tl.fromTo(["#va-store", "#va-lab", "#va-shelf", "#va-weeks"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.9);
           tl.fromTo("#va-person", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.1);
           tl.fromTo("#va-caption", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 9.8);
+          // all text fades fully out before the wipe, so no two slides' text is ever on screen together
+          tl.to("#va-page > *", { opacity: 0, duration: 0.35, ease: "power2.in" }, D - 1.05);
           // wipe out (white -> dark), revealing the next dark scene underneath
           tl.to("#va-page", { clipPath: "inset(0px 0px 0px 100%)", duration: 0.7, ease: "power3.inOut" }, D - 0.7);
           tl.fromTo("#va-edge", { x: 0, opacity: 0 }, { x: 1920, opacity: 1, duration: 0.7, ease: "power3.inOut", immediateRender: false }, D - 0.7);

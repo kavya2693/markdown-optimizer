@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14 14:18",
+ "generated": "2026-10-14 18:43",
  "commit": "53fed34eb58576187392a2d38677502d4ffbe523",
  "checks": [
   {
@@ -52,7 +52,7 @@
   },
   {
    "id": "F-07",
-   "shown": "156 weeks",
+   "shown": "156 weeks of sales history",
    "type": "direct",
    "computed": "156",
    "expect": "156",
@@ -68,7 +68,7 @@
   },
   {
    "id": "F-09",
-   "shown": "0\u201360% off",
+   "shown": "discounts 0\u201360% / 0\u201360%, never rises",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -76,7 +76,7 @@
   },
   {
    "id": "F-10",
-   "shown": "4-week events",
+   "shown": "over 4 weeks / 4-week markdown path",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -84,7 +84,7 @@
   },
   {
    "id": "F-11",
-   "shown": "leftovers go for 30% of cost",
+   "shown": "leftovers sell at 30% of cost",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -108,7 +108,7 @@
   },
   {
    "id": "F-14",
-   "shown": "score all 210 / 210 of them / 210 paths/SKU-event / scored 210 / 210",
+   "shown": "score all 210 / 210 of them / 210 paths per SKU / scored 210 / 210 / best margin of 210 paths",
    "type": "derived",
    "computed": "210",
    "expect": "210",
@@ -124,7 +124,7 @@
   },
   {
    "id": "F-16",
-   "shown": "CLEAR 75% / clears 75% / \u2265 75% sold? / target 75%",
+   "shown": "CLEAR 75% / clears 75% / \u2265 75% sold? / target 75% / 75% must sell",
    "type": "direct",
    "computed": "75",
    "expect": "75",
@@ -172,7 +172,7 @@
   },
   {
    "id": "F-22",
-   "shown": "the price never goes back up / never back up",
+   "shown": "the price never goes back up / never rises",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -180,7 +180,7 @@
   },
   {
    "id": "F-23",
-   "shown": "thin products lean on their category / steadied by its category / EB shrinkage toward category",
+   "shown": "thin products lean on their category / steadied by its category / Category blend \u00b7 empirical Bayes \u00b7 thin SKUs lean most",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -188,7 +188,7 @@
   },
   {
    "id": "F-24",
-   "shown": "generate_data.py, sales.csv, events.csv, features.py prepare(), Poisson GLM, EB shrinkage, fit_controls(), simulate.py planner's curve, optimize.py ladder search, markdown_plan.csv, data/truth/, lift.py, simulate.py scorer, results.json, report.md, cli.py",
+   "shown": "generate_data.py, sales.csv, events.csv, features.py prepare(), Poisson GLM, Category blend (empirical Bayes), fit_controls(), simulate.py planner's curve, optimize.py ladder search, markdown_plan.csv, data/truth/, lift.py, simulate.py scorer, results.json, report.md, cli.py",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -196,7 +196,7 @@
   },
   {
    "id": "F-25",
-   "shown": "no \u2192 else: max sell-through",
+   "shown": "no \u2192 else: sell the most",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -236,7 +236,7 @@
   },
   {
    "id": "F-30",
-   "shown": "make run \u2248 10 s / ~10 s",
+   "shown": "make run \u2248 10 s \u00b7 offline / ~10 s",
    "type": "illustrative",
    "status": "manual",
    "computed": "-",
@@ -244,7 +244,7 @@
   },
   {
    "id": "F-31",
-   "shown": "no network",
+   "shown": "offline",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -252,7 +252,7 @@
   },
   {
    "id": "F-32",
-   "shown": "data/truth/ \u00b7 eval code only \u00b7 sealed",
+   "shown": "data/truth/ \u00b7 true price effects \u00b7 eval code only \u00b7 sealed",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -260,7 +260,7 @@
   },
   {
    "id": "F-33",
-   "shown": "competitor held flat",
+   "shown": "competitor price held",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -268,7 +268,7 @@
   },
   {
    "id": "F-34",
-   "shown": "IRLS \u00b7 one per SKU \u00b7 bulk-order refit \u00b7 4 estimators",
+   "shown": "Poisson GLM \u00b7 one fit per SKU \u00b7 bulk orders removed",
    "type": "direct",
    "computed": "true",
    "expect": "true",
@@ -284,7 +284,7 @@
   },
   {
    "id": "F-36",
-   "shown": "0.385",
+   "shown": "0.385 / estimate error 0.385",
    "type": "direct",
    "computed": "0.385",
    "expect": "0.385",
@@ -292,7 +292,7 @@
   },
   {
    "id": "F-37",
-   "shown": "0.279",
+   "shown": "0.279 / estimate error 0.279",
    "type": "direct",
    "computed": "0.279",
    "expect": "0.279",
@@ -300,7 +300,7 @@
   },
   {
    "id": "F-38",
-   "shown": "Fewest promotions: 0.497",
+   "shown": "Rarely promoted SKUs: 0.497",
    "type": "direct",
    "computed": "0.497",
    "expect": "0.497",
@@ -316,7 +316,7 @@
   },
   {
    "id": "F-40",
-   "shown": "\u221228% error / \u221228% / cut elasticity error 28%",
+   "shown": "\u221228% error / \u221228% / Blending cut the error 28%",
    "type": "derived",
    "computed": "-28",
    "expect": "-28",
@@ -404,7 +404,7 @@
   },
   {
    "id": "F-51",
-   "shown": "75% / 75% sold",
+   "shown": "75% / 75% (shelf)",
    "type": "direct",
    "computed": "75",
    "expect": "75",
@@ -428,7 +428,7 @@
   },
   {
    "id": "F-54",
-   "shown": "87%",
+   "shown": "87% / 87% of the gap to a perfect planner",
    "type": "direct",
    "computed": "87",
    "expect": "87",
@@ -468,7 +468,7 @@
   },
   {
    "id": "F-59",
-   "shown": "20%, picked with hindsight",
+   "shown": "20% for all \u00b7 20% was found in hindsight",
    "type": "direct",
    "computed": "20",
    "expect": "20",
@@ -491,16 +491,8 @@
    "status": "pass"
   },
   {
-   "id": "F-62",
-   "shown": "+43,496",
-   "type": "direct",
-   "computed": "43,496",
-   "expect": "43,496",
-   "status": "pass"
-  },
-  {
    "id": "F-63",
-   "shown": "1,046",
+   "shown": "only 1,046",
    "type": "direct",
    "computed": "1,046",
    "expect": "1,046",
@@ -516,8 +508,64 @@
   },
   {
    "id": "F-65",
-   "shown": "The gain comes from deciding per SKU with a clearance floor.",
+   "shown": "Sharper estimates barely add margin. So I fixed the decision.",
    "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-68",
+   "shown": "+34,581",
+   "type": "direct",
+   "computed": "34,581",
+   "expect": "34,581",
+   "status": "pass"
+  },
+  {
+   "id": "F-69",
+   "shown": "estimate error 0.334",
+   "type": "direct",
+   "computed": "0.334",
+   "expect": "0.334",
+   "status": "pass"
+  },
+  {
+   "id": "F-70",
+   "shown": "clears 90.6%",
+   "type": "direct",
+   "computed": "90.6",
+   "expect": "90.6",
+   "status": "pass"
+  },
+  {
+   "id": "F-71",
+   "shown": "clears 71.1%",
+   "type": "direct",
+   "computed": "71.1",
+   "expect": "71.1",
+   "status": "pass"
+  },
+  {
+   "id": "F-72",
+   "shown": "clears 92.1% \u00b7 today",
+   "type": "direct",
+   "computed": "92.1",
+   "expect": "92.1",
+   "status": "pass"
+  },
+  {
+   "id": "F-73",
+   "shown": "THE FIX, IN THE REPO \u00b7 choose(): best margin of 210 paths that still clears 75%",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-74",
+   "shown": "under 2% of the total",
+   "type": "derived",
    "computed": "true",
    "expect": "true",
    "status": "pass"

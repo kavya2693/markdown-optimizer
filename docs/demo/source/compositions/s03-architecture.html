@@ -15,6 +15,7 @@
         <div class="scene" id="arch-in">
           <div class="eyebrow" data-layout-allow-overlap id="arch-eyebrow">05 · Architecture</div>
           <div class="scene-title" data-layout-allow-overlap id="arch-title">History in, a markdown plan out, graded on a sealed truth.</div>
+          <div class="scene-sub" id="arch-sub">Each box is a real file. Data flows left to right; the band below grades each plan on the hidden true demand.</div>
           <div class="diagram" id="arch-diagram">
             <svg class="wires" viewBox="0 0 1920 1080" id="arch-svg"></svg>
           </div>
@@ -27,7 +28,7 @@
              Layers left to right: sources -> features -> models -> decision -> outputs; evaluation band below. */
           const D = 17.0;
           const NS = "http://www.w3.org/2000/svg";
-          const COL = { data: "#7fa8ff", model: "#b9a2ff", opt: "#3fd8a8", eval: "#f2c46d", risk: "#ff8a73", ink: "#b2bfcc" };
+          const COL = { data: "#7fa8ff", model: "#b9a2ff", opt: "#3fd8a8", eval: "#f2c46d", risk: "#ff8a73", ink: "#c8d3de" };
           const FILL = { data: "#0f1a2b", model: "#151530", opt: "#0d2228", eval: "#1e1b14", risk: "#24141a", ink: "#0f1a26" };
           const svg = document.getElementById("arch-svg");
           const el = (tag, attrs, parent) => {
@@ -42,16 +43,16 @@
             return t;
           };
           const tag = (g, x, y, s, c) => {
-            const w = s.length * 12 + 18;
-            el("rect", { x, y: y - 14, width: w, height: 28, rx: 6, fill: "#0a1119", stroke: c, "stroke-width": 2 }, g);
-            txt(g, x + 9, y + 7, s, { class: "mono", "font-size": 20, fill: c });
+            const w = Math.round(s.length * 13.2 + 20);
+            el("rect", { x, y: y - 16, width: w, height: 32, rx: 6, fill: "#0a1119", stroke: c, "stroke-width": 2 }, g);
+            txt(g, x + 10, y + 8, s, { class: "mono", "font-size": 22, fill: c });
           };
 
           // ---------------- layers ----------------
           const layerG = el("g", { id: "arch-layers" });
           const band = el("g", { id: "arch-band" }, layerG);
           el("rect", { x: 86, y: 772, width: 1798, height: 190, rx: 18, fill: "rgba(242,196,109,0.04)", stroke: "rgba(242,196,109,0.45)", "stroke-width": 2, "stroke-dasharray": "10 8" }, band);
-          tag(band, 108, 772, "EVALUATION · OFFLINE, ON SEALED TRUTH", COL.eval);
+          tag(band, 108, 772, "EVALUATION · HIDDEN TRUE DEMAND", COL.eval);
           const heads = [
             { id: "h1", x: 100, s: "SOURCES", c: COL.data },
             { id: "h2", x: 440, s: "FEATURES", c: COL.data },
@@ -61,7 +62,7 @@
           ];
           heads.forEach((h) => {
             const g = el("g", { id: "arch-" + h.id }, layerG);
-            txt(g, h.x, 208, h.s, { class: "mono", "font-size": 20, "font-weight": 700, fill: h.c, "letter-spacing": "2" });
+            txt(g, h.x, 208, h.s, { class: "mono", "font-size": 22, "font-weight": 700, fill: h.c, "letter-spacing": "2" });
           });
 
           // group frames (one per module that owns several boxes)
@@ -78,22 +79,22 @@
           // ---------------- nodes ----------------
           // kind: box | cyl (data store) | doc (file written) | diamond (decision) | person (human, outside the repo)
           const N = {
-            gen: { kind: "box", x: 100, y: 262, w: 250, h: 82, L: "data", tag: "generate_data.py", t: "Seeded generator", s: ["seed 7 · 400 SKUs"] },
+            gen: { kind: "box", x: 100, y: 262, w: 250, h: 86, L: "data", tag: "generate_data.py", t: "Seeded generator", s: ["seed 7 · 400 SKUs"] },
             sales: { kind: "cyl", x: 100, y: 380, w: 250, h: 112, L: "data", t: "sales.csv", s: ["61,799 SKU-weeks"] },
             events: { kind: "cyl", x: 100, y: 540, w: 250, h: 112, L: "data", t: "events.csv", s: ["300 SKU-events"] },
-            prep: { kind: "box", x: 440, y: 330, w: 240, h: 170, L: "data", tag: "features.py", t: "prepare()", s: ["comp. gaps filled", "post-promo flag", "Fourier season"] },
-            glm: { kind: "box", x: 790, y: 290, w: 270, h: 104, L: "model", t: "Poisson GLM", s: ["IRLS · one per SKU", "bulk-order refit"] },
-            shrink: { kind: "box", x: 790, y: 436, w: 270, h: 104, L: "model", t: "EB shrinkage", s: ["DerSimonian-Laird", "toward category"] },
-            ctrl: { kind: "box", x: 790, y: 582, w: 270, h: 104, L: "model", t: "fit_controls()", s: ["β, γ held fixed", "refit season, promo"] },
-            curve: { kind: "box", x: 1190, y: 292, w: 280, h: 80, L: "opt", tag: "simulate.py", tagLeft: true, t: "Planner's curve", s: ["competitor held flat"] },
-            ladder: { kind: "box", x: 1190, y: 398, w: 280, h: 162, L: "opt", hero: true, t: "Ladder search", s: ["210 paths/SKU-event", "0-60%, never back up", "exhaustive, no solver"] },
+            prep: { kind: "box", x: 440, y: 330, w: 240, h: 170, L: "data", tag: "features.py", t: "prepare()", s: ["gaps filled", "dip after promos", "seasonal pattern"] },
+            glm: { kind: "box", x: 790, y: 290, w: 270, h: 104, L: "model", t: "Poisson GLM", s: ["one fit per SKU", "bulk orders removed"] },
+            shrink: { kind: "box", x: 790, y: 436, w: 270, h: 104, L: "model", t: "Category blend", s: ["empirical Bayes", "thin SKUs lean most"] },
+            ctrl: { kind: "box", x: 790, y: 582, w: 270, h: 104, L: "model", t: "fit_controls()", s: ["price effect fixed", "refit season, promos"] },
+            curve: { kind: "box", x: 1190, y: 292, w: 280, h: 80, L: "opt", tag: "simulate.py", tagLeft: true, t: "Planner's curve", s: ["competitor price held"] },
+            ladder: { kind: "box", x: 1190, y: 398, w: 280, h: 162, L: "opt", hero: true, t: "Ladder search", s: ["210 paths per SKU", "0–60%, never rises", "all scored, no solver"] },
             dec: { kind: "diamond", cx: 1330, cy: 632, hw: 126, hh: 48, L: "opt", t: "≥ 75% sold?" },
-            fall: { kind: "box", x: 1190, y: 712, w: 280, h: 46, L: "risk", dash: true, t: "", s: [], line: "else: max sell-through" },
-            plan: { kind: "doc", x: 1590, y: 300, w: 250, h: 100, L: "opt", t: "markdown_plan.csv", s: ["4 weekly depths"] },
-            human: { kind: "person", x: 1650, y: 450, w: 190, h: 120, L: "ink", t: "Pricing analyst", s: ["outside repo"] },
-            truth: { kind: "cyl", x: 100, y: 800, w: 250, h: 140, L: "data", lock: true, t: "data/truth/", s: ["true β, γ, prices", "eval code only"] },
+            fall: { kind: "box", x: 1190, y: 712, w: 280, h: 46, L: "risk", dash: true, t: "", s: [], line: "else: sell the most" },
+            plan: { kind: "doc", x: 1590, y: 300, w: 250, h: 100, L: "opt", t: "markdown_plan.csv", s: ["4 weekly discounts"] },
+            human: { kind: "person", x: 1650, y: 450, w: 190, h: 128, L: "ink", t: "Pricing analyst", s: ["outside repo"] },
+            truth: { kind: "cyl", x: 100, y: 800, w: 250, h: 140, L: "data", lock: true, t: "data/truth/", s: ["true price effects", "eval code only"] },
             lift: { kind: "box", x: 440, y: 800, w: 240, h: 100, L: "eval", tag: "lift.py", t: "Promo lift", s: ["6,531 past promos"] },
-            sim: { kind: "box", x: 770, y: 800, w: 720, h: 140, L: "eval", tag: "simulate.py", t: "Score every plan on the true curve", s: ["400 paired draws × 300 SKU-events · seed 11", "no markdown · 30% rule · 4 estimators · best blanket · oracle"] },
+            sim: { kind: "box", x: 770, y: 800, w: 720, h: 140, L: "eval", tag: "simulate.py", t: "Score every plan on the true curve", s: ["400 paired draws × 300 SKU-events · seed 11", "vs 30% rule · one depth for all · a perfect planner"] },
             res: { kind: "doc", x: 1650, y: 800, w: 190, h: 120, L: "eval", t: "results.json", s: ["report.md", "+ 7 CSVs"] },
           };
 
@@ -105,12 +106,12 @@
               const r = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, fill: f, stroke: c, "stroke-opacity": n.hero ? 1 : 0.7, "stroke-width": n.hero ? 3 : 2 }, g);
               if (n.dash) r.setAttribute("stroke-dasharray", "8 6");
               n.shape = r;
-              if (n.line) { txt(g, n.x + n.w / 2, n.y + 30, n.line, { class: "mono", "font-size": 20, fill: c, "text-anchor": "middle" }); }
+              if (n.line) { txt(g, n.x + n.w / 2, n.y + 31, n.line, { class: "mono", "font-size": 22, fill: c, "text-anchor": "middle" }); }
               else {
-                txt(g, n.x + 16, n.y + 38, n.t, { "font-size": n.hero ? 28 : 25, "font-weight": 700, class: n.t.endsWith(")") ? "mono" : "" });
-                n.s.forEach((s, k) => txt(g, n.x + 16, n.y + 68 + k * 26, s, { class: n.w > 600 && k === 1 ? "" : "mono", "font-size": 20, fill: "#b2bfcc" }));
+                txt(g, n.x + 16, n.y + 42, n.t, { "font-size": n.hero ? 28 : 25, "font-weight": 700, class: n.t.endsWith(")") ? "mono" : "" });
+                n.s.forEach((s, k) => txt(g, n.x + 16, n.y + 68 + k * 27, s, { "font-size": 23, "font-weight": 500, fill: "#c8d3de" }));
               }
-              if (n.tag) tag(g, n.tagLeft ? n.x + 14 : n.x + n.w - n.tag.length * 12 - 30, n.y, n.tag, c);
+              if (n.tag) tag(g, n.tagLeft ? n.x + 14 : n.x + n.w - Math.round(n.tag.length * 13.2) - 32, n.y, n.tag, c);
             } else if (n.kind === "cyl") {
               const e = 14, x = n.x, y = n.y, w = n.w, h = n.h;
               const d = "M" + x + " " + (y + e) + " a" + w / 2 + " " + e + " 0 0 0 " + w + " 0 v" + (h - 2 * e) + " a" + w / 2 + " " + e + " 0 0 1 " + -w + " 0 z";
@@ -118,7 +119,7 @@
               if (n.lock) n.shape.setAttribute("stroke-dasharray", "8 6");
               el("ellipse", { cx: x + w / 2, cy: y + e, rx: w / 2, ry: e, fill: "#16263a", stroke: c, "stroke-opacity": 0.75, "stroke-width": 2 }, g);
               txt(g, x + 16, y + 58, n.t, { class: "mono", "font-size": 24, "font-weight": 700 });
-              n.s.forEach((s, k) => txt(g, x + 16, y + 86 + k * 26, s, { class: "mono", "font-size": 20, fill: k === 1 && n.lock ? COL.eval : "#b2bfcc" }));
+              n.s.forEach((s, k) => txt(g, x + 16, y + 86 + k * 27, s, { "font-size": 23, "font-weight": 500, fill: k === 1 && n.lock ? COL.eval : "#c8d3de" }));
               if (n.lock) {
                 const lx = x + w - 44, ly = y + 38;
                 el("rect", { x: lx, y: ly + 10, width: 24, height: 18, rx: 3, fill: COL.eval }, g);
@@ -128,19 +129,19 @@
               const x = n.x, y = n.y, w = n.w, h = n.h, k = 22;
               n.shape = el("path", { d: "M" + x + " " + y + "h" + (w - k) + "l" + k + " " + k + "v" + (h - k) + "h" + -w + "z", fill: f, stroke: c, "stroke-opacity": 0.8, "stroke-width": 2 }, g);
               el("path", { d: "M" + (x + w - k) + " " + y + "v" + k + "h" + k, fill: "none", stroke: c, "stroke-opacity": 0.8, "stroke-width": 2 }, g);
-              txt(g, x + 14, y + 40, n.t, { class: "mono", "font-size": 21, "font-weight": 700 });
-              n.s.forEach((s, j) => txt(g, x + 14, y + 68 + j * 26, s, { class: "mono", "font-size": 20, fill: "#b2bfcc" }));
+              txt(g, x + 14, y + 40, n.t, { class: "mono", "font-size": 22, "font-weight": 700 });
+              n.s.forEach((s, j) => txt(g, x + 14, y + 68 + j * 27, s, { "font-size": 23, "font-weight": 500, fill: "#c8d3de" }));
             } else if (n.kind === "diamond") {
               const { cx, cy, hw, hh } = n;
               n.shape = el("path", { d: "M" + cx + " " + (cy - hh) + "L" + (cx + hw) + " " + cy + "L" + cx + " " + (cy + hh) + "L" + (cx - hw) + " " + cy + "z", fill: FILL.opt, stroke: c, "stroke-width": 2.5 }, g);
-              txt(g, cx, cy + 8, n.t, { class: "mono", "font-size": 22, "font-weight": 700, "text-anchor": "middle", fill: COL.opt });
+              txt(g, cx, cy + 8, n.t, { class: "mono", "font-size": 23, "font-weight": 700, "text-anchor": "middle", fill: COL.opt });
             } else if (n.kind === "person") {
-              n.shape = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, fill: "none", stroke: "#8494a6", "stroke-width": 2, "stroke-dasharray": "6 6" }, g);
+              n.shape = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, fill: "none", stroke: "#9fb0c2", "stroke-width": 2, "stroke-dasharray": "6 6" }, g);
               const px = n.x + n.w / 2, py = n.y + 34;
-              el("circle", { cx: px, cy: py - 8, r: 11, fill: "#b2bfcc" }, g);
-              el("path", { d: "M" + (px - 18) + " " + (py + 22) + "v-8a18 14 0 0 1 36 0v8z", fill: "#b2bfcc" }, g);
+              el("circle", { cx: px, cy: py - 8, r: 11, fill: "#c8d3de" }, g);
+              el("path", { d: "M" + (px - 18) + " " + (py + 22) + "v-8a18 14 0 0 1 36 0v8z", fill: "#c8d3de" }, g);
               txt(g, px, n.y + 88, n.t, { "font-size": 22, "font-weight": 700, "text-anchor": "middle" });
-              txt(g, px, n.y + 111, n.s[0], { class: "mono", "font-size": 20, "text-anchor": "middle", fill: "#8494a6" });
+              txt(g, px, n.y + 114, n.s[0], { "font-size": 23, "font-weight": 500, "text-anchor": "middle", fill: "#c8d3de" });
             }
           });
 
@@ -148,16 +149,16 @@
           // style: solid = batch data flow · dashed = sealed truth (eval only) / human hand-off · dotted = seed-sweep loop
           // label: [text lines], x, y (first baseline), anchor
           const W = [
-            { id: "gs", pts: [[225, 344], [225, 380]], c: "data", step: 0 },
+            { id: "gs", pts: [[225, 348], [225, 380]], c: "data", step: 0 },
             { id: "ge", pts: [[100, 303], [80, 303], [80, 596], [100, 596]], c: "data", step: 0 },
             { id: "gt", pts: [[80, 596], [80, 870], [100, 870]], c: "data", step: 0, noHead: false },
             { id: "sp", pts: [[350, 436], [440, 436]], c: "data", step: 1, crit: true, lab: [["61,799", "rows"], 395, 396, "middle"] },
-            { id: "pg", pts: [[680, 360], [790, 360]], c: "data", step: 2, crit: true, lab: [["design", "matrix"], 735, 318, "middle"] },
-            { id: "gk", pts: [[925, 394], [925, 436]], c: "model", step: 3, crit: true, lab: [["β̂ ± se"], 937, 422, "start"] },
-            { id: "kc", pts: [[925, 540], [925, 582]], c: "model", step: 4, crit: true, lab: [["pooled β, γ"], 937, 568, "start"] },
-            { id: "cc", pts: [[1060, 634], [1120, 634], [1120, 332], [1190, 332]], c: "model", step: 5, crit: true, lab: [["coefs"], 1155, 318, "middle"] },
-            { id: "el", pts: [[350, 596], [380, 596], [380, 708], [1150, 708], [1150, 500], [1190, 500]], c: "data", step: 5, lab: [["stock · cost · salvage"], 450, 694, "start"] },
-            { id: "cl", pts: [[1330, 372], [1330, 398]], c: "opt", step: 6, crit: true, lab: [["E[units]"], 1342, 392, "start"] },
+            { id: "pg", pts: [[680, 360], [790, 360]], c: "data", step: 2, crit: true, lab: [["model", "inputs"], 735, 318, "middle"] },
+            { id: "gk", pts: [[925, 394], [925, 436]], c: "model", step: 3, crit: true, lab: [["estimates"], 937, 422, "start"] },
+            { id: "kc", pts: [[925, 540], [925, 582]], c: "model", step: 4, crit: true, lab: [["blended"], 937, 568, "start"] },
+            { id: "cc", pts: [[1060, 634], [1120, 634], [1120, 332], [1190, 332]], c: "model", step: 5, crit: true, lab: [["fit"], 1155, 318, "middle"] },
+            { id: "el", pts: [[350, 596], [380, 596], [380, 708], [1150, 708], [1150, 500], [1190, 500]], c: "data", step: 5, lab: [["stock · cost · leftover"], 450, 694, "start"] },
+            { id: "cl", pts: [[1330, 372], [1330, 398]], c: "opt", step: 6, crit: true, lab: [["forecast"], 1342, 392, "start"] },
             { id: "ld", pts: [[1330, 560], [1330, 584]], c: "opt", step: 7, crit: true },
             { id: "dy", pts: [[1456, 632], [1530, 632], [1530, 350], [1590, 350]], c: "opt", step: 8, crit: true, lab: [["yes"], 1493, 620, "middle"] },
             { id: "df", pts: [[1330, 680], [1330, 712]], c: "risk", step: 8, dash: "6 5", lab: [["no"], 1342, 702, "start"] },
@@ -167,7 +168,7 @@
             { id: "tl", pts: [[350, 840], [440, 840]], c: "eval", step: 9, dash: "10 7" },
             { id: "ts", pts: [[350, 920], [770, 920]], c: "eval", step: 9, dash: "10 7", lab: [["true curve + real prices"], 450, 948, "start"] },
             { id: "cf", pts: [[810, 686], [810, 750], [610, 750], [610, 800]], c: "model", step: 9, lab: [["model baseline"], 626, 740, "start"] },
-            { id: "sr", pts: [[1490, 885], [1650, 885]], c: "eval", step: 10, lab: [["margin · CI"], 1570, 870, "middle"] },
+            { id: "sr", pts: [[1490, 885], [1650, 885]], c: "eval", step: 10, lab: [["margins"], 1570, 870, "middle"] },
             { id: "sw", pts: [[1840, 860], [1872, 860], [1872, 236], [225, 236], [225, 262]], c: "ink", step: 11, dash: "2 7", lab: [["make sweep: seeds 8-11"], 1100, 243, "middle"], bg: true },
           ];
           // arrowheads per colour
@@ -191,26 +192,26 @@
               const [lines, lx, ly, anchor] = w.lab;
               const lg = el("g", { id: "wl-" + w.id }, svg);
               if (w.bg) {
-                const tw = Math.max(...lines.map((s) => s.length)) * 12 + 20;
+                const tw = Math.round(Math.max(...lines.map((s) => s.length)) * 13.2 + 22);
                 el("rect", { x: anchor === "middle" ? lx - tw / 2 : lx - 10, y: ly - 20, width: tw, height: 28, rx: 6, fill: "#0a1119" }, lg);
               }
-              lines.forEach((s, k) => txt(lg, lx, ly + k * 23, s, { class: "mono", "font-size": 20, fill: COL[w.c], "text-anchor": anchor }));
+              lines.forEach((s, k) => txt(lg, lx, ly + k * 24, s, { class: "mono", "font-size": 22, fill: COL[w.c], "text-anchor": anchor }));
               w.lg = lg;
             }
           });
-          frames.forEach((f) => tag(f.g, f.right ? f.x + f.w - f.t.length * 12 - 34 : f.x + 16, f.y, f.t, f.c));
+          frames.forEach((f) => tag(f.g, f.right ? f.x + f.w - Math.round(f.t.length * 13.2) - 36 : f.x + 16, f.y, f.t, f.c));
 
           // annotations: non-functional facts the repo supports, and the critical-path pill
           const nfr = el("g", { id: "arch-nfr" });
-          tag(nfr, 1330, 772, "batch CLI · make run ≈ 10 s · no network", "#b2bfcc");
+          tag(nfr, 1484, 772, "make run ≈ 10 s · offline", "#c8d3de");
           const pill = el("g", { id: "arch-crit", opacity: 0 });
-          el("rect", { x: 664, y: 757, width: 592, height: 32, rx: 16, fill: "#eef2f6" }, pill);
-          txt(pill, 960, 780, "critical path: sales.csv → markdown_plan.csv", { class: "mono", "font-size": 20, "font-weight": 700, fill: "#0a1119", "text-anchor": "middle" });
+          el("rect", { x: 640, y: 755, width: 640, height: 36, rx: 18, fill: "#eef2f6" }, pill);
+          txt(pill, 960, 780, "critical path: sales.csv → markdown_plan.csv", { class: "mono", "font-size": 22, "font-weight": 700, fill: "#0a1119", "text-anchor": "middle" });
           // stacking: layers < frames < wires < nodes < wire labels < annotations (packets and trace go on top)
           [defs, layerG, ...frames.map((f) => f.g), wireG, ...Object.values(N).map((n) => n.g), ...W.filter((w) => w.lg).map((w) => w.lg), nfr, pill]
             .forEach((n) => svg.appendChild(n));
           // counter inside the hero box
-          const counter = txt(N.ladder.g, 1206, 548, "scored 0 / 210", { class: "mono", "font-size": 20, "font-weight": 700, fill: COL.opt, id: "arch-count" });
+          const counter = txt(N.ladder.g, 1206, 549, "scored 0 / 210", { class: "mono", "font-size": 22, "font-weight": 700, fill: COL.opt, id: "arch-count" });
           counter.setAttribute("opacity", "0");
 
           // ---------------- timeline ----------------
@@ -218,7 +219,9 @@
           tl.fromTo("#arch-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
           tl.fromTo("#arch-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
           tl.fromTo("#arch-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
-          tl.fromTo("#arch-diagram", { scale: 0.985 }, { scale: 1, duration: D, ease: "sine.out" }, 0);
+          tl.fromTo("#arch-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.5);
+          // diagram sits below the subtitle: scaled to 0.96 and moved down 32 px so it clears the title block and the chrome
+          tl.fromTo("#arch-diagram", { scale: 0.945, y: 32 }, { scale: 0.96, y: 32, duration: D, ease: "sine.out" }, 0);
 
           const show = (sel, at, dy) => tl.fromTo(sel, { opacity: 0, y: dy || 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at);
           const draw = (w, at) => {
@@ -277,7 +280,7 @@
             ...W.filter((w) => !w.crit && w.lg).map((w) => "#wl-" + w.id),
             "#arch-fr-el", "#arch-fr-op",
           ];
-          tl.to(dimSel, { opacity: 0.22, duration: 0.6, ease: "power2.inOut" }, CP);
+          tl.to(dimSel, { opacity: 0.75, duration: 0.6, ease: "power2.inOut" }, CP); // stays >= 4.5:1
           const traceG = el("g", { id: "arch-trace" });
           critIds.forEach((id, i) => {
             const w = wire(id);
@@ -286,7 +289,7 @@
           });
           critNodes.forEach((k, i) => tl.to(N[k].shape, { attr: { "stroke-width": 4.5, "stroke-opacity": 1 }, duration: 0.25 }, CP + 0.3 + i * 0.24));
           tl.fromTo(pill, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.4 }, CP + 0.4);
-          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.8); // dip: fully out before the next scene starts
           window.__timelines["arch"] = tl;
         })();
       </script>

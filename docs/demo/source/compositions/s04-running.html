@@ -6,13 +6,13 @@
       <style>
         #running-root { position: absolute; inset: 0; }
         #running-root .chart {
-          position: absolute; left: 120px; top: 214px; width: 1100px; height: 720px; border-radius: 14px;
+          position: absolute; left: 120px; top: 250px; width: 1100px; height: 720px; border-radius: 14px;
           border: 2px solid var(--line); background: #0b1722;
         }
         #running-root svg.plot { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
         #running-root svg text { font-family: "JetBrains Mono", monospace; }
-        #running-root .side { position: absolute; left: 1290px; top: 230px; width: 510px; }
-        #running-root .side .lab { font-family: var(--mono); font-size: 22px; letter-spacing: 0.1em; color: var(--ink-mute); }
+        #running-root .side { position: absolute; left: 1290px; top: 266px; width: 510px; }
+        #running-root .side .lab { font-family: var(--mono); font-size: 22px; letter-spacing: 0.1em; color: var(--ink-soft); }
         #running-root .side .big {
           margin-top: 14px; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 120px; font-weight: 700;
           letter-spacing: -0.04em; line-height: 1; color: var(--c-data);
@@ -32,7 +32,7 @@
         #running-root .side .key i { display: block; width: 16px; height: 16px; border-radius: 50%; }
         /* phase 2 */
         #running-root .card {
-          position: absolute; left: 200px; top: 236px; width: 1520px; height: 640px; border-radius: 20px;
+          position: absolute; left: 200px; top: 262px; width: 1520px; height: 640px; border-radius: 20px;
           border: 2px solid rgba(63, 216, 168, 0.6); background: rgba(12, 22, 32, 0.97);
           box-shadow: 0 30px 120px rgba(0, 0, 0, 0.6); padding: 46px 64px;
         }
@@ -40,7 +40,7 @@
         #running-root .ev { display: flex; align-items: center; margin-top: 30px; }
         #running-root .ev .who { width: 210px; }
         #running-root .ev .who b { display: block; font-family: var(--mono); font-size: 34px; color: var(--ink); }
-        #running-root .ev .who small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 20px; color: var(--ink-mute); }
+        #running-root .ev .who small { display: block; margin-top: 4px; font-family: var(--mono); font-size: 22px; color: var(--ink-soft); }
         #running-root .bars { width: 1170px; }
         #running-root .bar-row { display: flex; align-items: center; height: 34px; margin: 4px 0; }
         #running-root .track { position: relative; width: 960px; height: 24px; }
@@ -51,11 +51,11 @@
         #running-root .val { width: 200px; padding-left: 18px; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 24px; color: var(--ink-soft); }
         #running-root .val.plan { color: var(--c-opt); font-weight: 700; }
         #running-root .val.orc { color: var(--c-eval); }
-        #running-root .legend2 { position: absolute; left: 274px; top: 800px; display: flex; gap: 40px; font-size: 24px; color: var(--ink-soft); }
+        #running-root .legend2 { position: absolute; left: 274px; top: 826px; display: flex; gap: 40px; font-size: 24px; color: var(--ink-soft); }
         #running-root .legend2 span { display: flex; align-items: center; gap: 12px; }
         #running-root .legend2 i { display: block; width: 28px; height: 16px; border-radius: 4px; }
         #running-root .total {
-          position: absolute; left: 1150px; top: 792px; font-family: var(--mono); font-size: 30px; color: var(--ink); white-space: nowrap;
+          position: absolute; left: 1150px; top: 818px; font-family: var(--mono); font-size: 30px; color: var(--ink); white-space: nowrap;
         }
         #running-root .total b { color: var(--c-opt); }
       </style>
@@ -63,17 +63,20 @@
       <div id="running-root" data-composition-id="running" data-width="1920" data-height="1080">
         <div class="scene" id="running-in">
           <div class="eyebrow" data-layout-allow-overlap id="running-eyebrow">06 · The system running</div>
-          <div class="scene-title" data-layout-allow-overlap id="running-title">400 elasticities, estimated alone, then pooled.</div>
+          <div class="scene-title" data-layout-allow-overlap id="running-title">400 price sensitivities, estimated alone, then blended.</div>
+          <div class="scene-sub" id="running-sub">Elasticity = how much sales move when price moves. One dot per SKU; closer to the dashed line is better.</div>
+          <div class="scene-title" data-layout-allow-overlap id="running-title2">Then every clearance event is scored on the true demand.</div>
+          <div class="scene-sub" id="running-sub2">Margin = profit after leftover losses, per event of 100 SKUs; a longer bar is better.</div>
           <div id="running-a">
             <div class="chart" id="running-chart"></div>
             <svg class="plot" id="running-svg" viewBox="0 0 1920 1080"></svg>
             <div class="side" id="running-side">
-              <div class="lab">MEAN ABSOLUTE ERROR VS TRUTH</div>
+              <div class="lab">AVERAGE MISS VS THE TRUE VALUE</div>
               <div class="big" id="running-mae">0.385</div>
-              <div class="state"><span id="running-s1" style="color: var(--c-data)">each SKU on its own</span><span id="running-s2" style="color: var(--c-model)">partial pooling</span></div>
-              <div class="row" id="running-few">Fewest promotions: <b id="running-few-a">0.497</b> → <b id="running-few-b">0.321</b></div>
+              <div class="state"><span id="running-s1" style="color: var(--c-data)">each SKU on its own</span><span id="running-s2" style="color: var(--c-model)">blended with its category</span></div>
+              <div class="row" id="running-few">Rarely promoted SKUs: <b id="running-few-a">0.497</b> → <b id="running-few-b">0.321</b></div>
               <div class="chip" id="running-chip">−28% error</div>
-              <div class="key" id="running-key"><span><i style="background: var(--c-data)"></i>alone</span><span><i style="background: var(--c-model)"></i>pooled</span></div>
+              <div class="key" id="running-key"><span><i style="background: var(--c-data)"></i>alone</span><span><i style="background: var(--c-model)"></i>blended</span></div>
             </div>
           </div>
           <div class="card" id="running-card">
@@ -106,26 +109,26 @@
           // plot geometry: x = true elasticity, y = estimate. Every estimate lies inside this range
           // (no pooling: -5.77 to +0.15; partial pooling: -5.49 to -0.26), so nothing is clipped.
           const X0 = -4.0, X1 = 0.2, Y0 = -6.0, Y1 = 0.5;
-          const PL = 220, PR = 1190, PT = 262, PB = 862;
+          const PL = 220, PR = 1190, PT = 298, PB = 898;
           const px = (x) => PL + ((x - X0) / (X1 - X0)) * (PR - PL);
           const py = (y) => PB - ((y - Y0) / (Y1 - Y0)) * (PB - PT);
           const axes = el("g", { id: "running-axes" });
           [-4, -3, -2, -1, 0].forEach((v) => {
             el("line", { x1: px(v), x2: px(v), y1: PT, y2: PB, stroke: "rgba(178,191,204,0.1)", "stroke-width": 2 }, axes);
-            const t = el("text", { x: px(v), y: PB + 32, "font-size": 20, fill: "#8494a6", "text-anchor": "middle" }, axes);
+            const t = el("text", { x: px(v), y: PB + 32, "font-size": 22, fill: "#9fb0c2", "text-anchor": "middle" }, axes);
             t.textContent = v === 0 ? "0" : "−" + Math.abs(v);
           });
           [-6, -4, -2, 0].forEach((v) => {
             el("line", { x1: PL, x2: PR, y1: py(v), y2: py(v), stroke: "rgba(178,191,204,0.1)", "stroke-width": 2 }, axes);
-            const t = el("text", { x: PL - 14, y: py(v) + 7, "font-size": 20, fill: "#8494a6", "text-anchor": "end" }, axes);
+            const t = el("text", { x: PL - 14, y: py(v) + 7, "font-size": 22, fill: "#9fb0c2", "text-anchor": "end" }, axes);
             t.textContent = v === 0 ? "0" : "−" + Math.abs(v);
           });
-          const xl = el("text", { x: (PL + PR) / 2, y: PB + 62, "font-size": 20, fill: "#b2bfcc", "text-anchor": "middle" }, axes);
-          xl.textContent = "true elasticity (known from the generator) →";
-          const yl = el("text", { x: PL + 12, y: PT + 26, "font-size": 20, fill: "#b2bfcc" }, axes);
-          yl.textContent = "↑ estimated";
+          const xl = el("text", { x: (PL + PR) / 2, y: PB + 62, "font-size": 22, fill: "#c8d3de", "text-anchor": "middle" }, axes);
+          xl.textContent = "true value (known from the generator) →";
+          const yl = el("text", { x: PL + 12, y: PT + 26, "font-size": 22, fill: "#c8d3de" }, axes);
+          yl.textContent = "↑ our estimate";
           el("line", { x1: px(X0), y1: py(X0), x2: px(X1), y2: py(X1), stroke: "#3fd8a8", "stroke-width": 3, "stroke-dasharray": "10 8" }, axes);
-          const dl = el("text", { x: px(0.15), y: py(0.15) - 18, "font-size": 20, fill: "#3fd8a8", "text-anchor": "end" }, axes);
+          const dl = el("text", { x: px(0.15), y: py(0.15) - 18, "font-size": 22, fill: "#3fd8a8", "text-anchor": "end" }, axes);
           dl.textContent = "perfect estimate";
           const dots = el("g", { id: "running-dots" });
           const pts = DATA.pts.map((p, i) => ({ c: el("circle", { cx: px(p[0]), cy: py(p[1]), r: 5.5, fill: "#7fa8ff", "fill-opacity": 0.75 }, dots), p, i }));
@@ -134,6 +137,8 @@
           tl.fromTo("#running-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
           tl.fromTo("#running-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
           tl.fromTo("#running-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+          tl.fromTo("#running-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.5);
+          tl.set(["#running-title2", "#running-sub2"], { opacity: 0 }, 0);
           tl.fromTo(["#running-chart", "#running-axes"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.4);
           pts.forEach(({ c, i }) => tl.fromTo(c, { attr: { r: 0 } }, { attr: { r: 5.5 }, duration: 0.3, ease: "power2.out" }, 0.7 + (i % 100) * 0.012 + Math.floor(i / 100) * 0.05));
           tl.fromTo("#running-side", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 1.0);
@@ -162,9 +167,11 @@
               '<div class="bars">' + bar("r", "rule", e.fixed_30) + bar("p", "plan", e.partial_pooling) + bar("o", "orc", e.oracle) + "</div></div>");
           });
           const P2 = 7.4;
-          tl.to("#running-a", { opacity: 0.1, duration: 0.6, ease: "power2.inOut" }, P2);
+          tl.to("#running-a", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, P2); // fully out: no phase-1 text behind the card
           tl.to("#running-side", { opacity: 0, duration: 0.5 }, P2);
-          tl.to("#running-title", { opacity: 0, duration: 0.3 }, P2);
+          tl.to(["#running-title", "#running-sub"], { opacity: 0, duration: 0.3 }, P2);
+          tl.fromTo("#running-title2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, P2 + 0.35);
+          tl.fromTo("#running-sub2", { opacity: 0 }, { opacity: 1, duration: 0.5 }, P2 + 0.6);
           tl.fromTo("#running-card", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, P2 + 0.2);
           DATA.events.forEach((_, i) => {
             const at = P2 + 0.9 + i * 0.45;
@@ -176,7 +183,7 @@
           const sum = DATA.events.reduce((s, e) => s + e.partial_pooling, 0);
           document.getElementById("running-tot-a").textContent = fmt(DATA.events.reduce((s, e) => s + e.fixed_30, 0));
           tl.to(tot, { v: sum, duration: 1.6, ease: "power2.out", onUpdate: () => { totEl.textContent = fmt(tot.v); } }, P2 + 2.8);
-          tl.to("#running-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          tl.to("#running-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.8); // dip: fully out before the next scene starts
           window.__timelines["running"] = tl;
         })();
       </script>
