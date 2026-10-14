@@ -8,9 +8,9 @@ How deep to mark down each slow-moving grocery SKU in a clearance event, worked 
 own price elasticity instead of a blanket 30% off, and checked against demand where the right
 answer is known.
 
-[![89-second silent walkthrough: the clearance problem, how elasticity drives each markdown, the architecture, the markdown sheet and the results](docs/demo/demo.gif)](docs/demo/demo.mp4)
+[![89-second silent walkthrough: the clearance problem, how elasticity drives each markdown, the architecture, the markdown sheet and the results](docs/demo/demo.gif)](https://kavya2693.github.io/work-demos/markdown-optimizer.mp4)
 
-*89-second silent walkthrough. Click for the full video ([MP4, 6 MB](docs/demo/demo.mp4)).*
+*89-second silent walkthrough. [Play the full video](https://kavya2693.github.io/work-demos/markdown-optimizer.mp4) · [download the MP4, 6 MB](docs/demo/demo.mp4).*
 
 📄 **Audit report:** every figure and assumption in the video, traced to its source — [PDF](docs/demo/AUDIT_REPORT.pdf) · [Word](docs/demo/AUDIT_REPORT.docx) · [Markdown](docs/demo/AUDIT_REPORT.md)
 
