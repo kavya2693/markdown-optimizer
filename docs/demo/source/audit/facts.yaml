@@ -1,0 +1,521 @@
+# Audit facts for the markdown-optimizer demo video.
+# Read by docs/demo/source/tools/build_audit_report.py (paths below are relative to this file).
+#
+# Check expressions are Python, evaluated with these helpers (paths relative to the repo root;
+# a "demo:" prefix means relative to the demo project folder):
+#   R(path) -> pandas DataFrame from CSV      J(path) -> parsed JSON
+#   row(path, **eq) -> the single CSV row matching all equalities (a pandas Series)
+#   T(path) -> file text                      grep(path, regex) -> True/False
+# A check passes when fmt.format(value) == expect (or, with fmt "bool", when value is True).
+
+project:
+  name: markdown-optimizer
+  title: "markdown-optimizer: demo video audit report"
+  repo_url: https://github.com/kavya2693/markdown-optimizer
+  repo_dir: ../../../..
+  demo_dir: ..
+  demo_display: docs/demo/source
+  out_dir: ../..
+  video: docs/demo/demo.mp4
+  video_duration_s: 88.8
+  outputs_dir: outputs
+  venv_python: .venv/bin/python
+  version_packages: [numpy, pandas]
+  regenerate:
+    - "make run                                   # data/ (seed 7) and outputs/*.csv, results.json, report.md (~10 s)"
+    - "make sweep                                 # adds outputs/seed_sweep.csv (seeds 7-11)"
+    - "PYTHONPATH=src .venv/bin/python docs/demo/source/tools/export_markdown_sheet.py docs/demo/source/assets/markdown_sheet.json"
+    - "python3 docs/demo/source/tools/inject_sheet.py docs/demo/source/assets/markdown_sheet.json docs/demo/source/compositions/value.html --rows SKU0222,SKU0315,SKU0195,SKU0271,SKU0199,SKU0169 --animate SKU0222,SKU0315,SKU0195,SKU0271"
+    - "python3 docs/demo/source/tools/inject_running.py . docs/demo/source/compositions/s04-running.html"
+    - "python3 docs/demo/source/tools/plan_heatmap.py outputs/markdown_plan.csv docs/demo/source/assets/plan-heatmap.png"
+    - "cd docs/demo/source && npx --yes hyperframes@0.8.156 check && npx --yes hyperframes@0.8.156 render -f 30 -q looks -o renders/markdown-optimizer-master.mp4 && cd -"
+    - "ffmpeg -y -i docs/demo/source/renders/markdown-optimizer-master.mp4 -c:v libx264 -preset slow -crf 25 -pix_fmt yuv420p -movflags +faststart -an docs/demo/demo.mp4"
+    - "python3 docs/demo/source/tools/build_audit_report.py docs/demo/source/audit/facts.yaml   # stills, checks, MD/DOCX/PDF"
+  seeds: {data: 7, scorer: 11, demand_draws: 400}
+  run_time: "make run (data + study, no sweep) took 9.9 s wall-clock on the author's laptop (Apple M1 Pro); the repo itself does not record a run time"
+
+assumptions:
+  - id: A-01
+    statement: "All data is synthetic, produced by a seeded generator sized to the production problem (400 SKUs in 12 categories, 156 weeks, three 4-week clearance events of 100 slow movers). The production data is proprietary."
+    source: "src/markdown_optimizer/config.py:7-40; src/markdown_optimizer/data.py:168 (generate, seed=7); README 'The data'"
+    figures: [F-03]
+    all_figures: true
+    edit: ["src/markdown_optimizer/config.py", "src/markdown_optimizer/data.py"]
+    rerun: ["make data", "make run"]
+  - id: A-02
+    statement: "The generator and the estimator share the same constant-elasticity log-log demand form, so model misspecification costs nothing here. On real data elasticity usually rises with discount depth."
+    source: "src/markdown_optimizer/data.py:49-69 (true_log_mu); src/markdown_optimizer/elasticity.py:1-13; README 'Known limitations' (biggest gap)"
+    figures: [F-17, F-18, F-19, F-36, F-37, F-38, F-39, F-40, F-41, F-42, F-43, F-44, F-53, F-54, F-58, F-60, F-61, F-62, F-63, F-64]
+    edit: ["src/markdown_optimizer/data.py:49-69"]
+    rerun: ["make data", "make run"]
+  - id: A-03
+    statement: "A plan must reach 75% expected sell-through over the event; otherwise the path that sells the most is taken (fallback)."
+    source: "src/markdown_optimizer/config.py:36 (sell_through_target = 0.75); src/markdown_optimizer/optimize.py:50-57 (choose)"
+    figures: [F-16, F-25, F-45, F-51, F-56]
+    edit: ["src/markdown_optimizer/config.py:36"]
+    rerun: ["make run", "export_markdown_sheet.py + inject_sheet.py"]
+  - id: A-04
+    statement: "Leftover units at the end of an event go to a liquidator at 30% of unit cost."
+    source: "src/markdown_optimizer/config.py:38 (salvage_share_of_cost = 0.30); data.py:265 (salvage_value)"
+    figures: [F-11, F-17, F-18, F-19, F-20, F-43, F-44, F-46, F-47, F-53, F-58, F-60, F-61, F-62]
+    edit: ["src/markdown_optimizer/config.py:38"]
+    rerun: ["make data", "make run"]
+  - id: A-05
+    statement: "Markdown ladder: 0-60% in 10-point steps, 4 weeks per event, depth never goes back up, so every SKU-event has exactly 210 candidate paths, all scored."
+    source: "src/markdown_optimizer/config.py:28 (LADDER), :34 (event_weeks = 4); src/markdown_optimizer/optimize.py:25-27 (ladder_paths)"
+    figures: [F-09, F-10, F-14, F-22]
+    edit: ["src/markdown_optimizer/config.py:28-34"]
+    rerun: ["make run"]
+  - id: A-06
+    statement: "The business-as-usual baseline is 30% off every SKU for all four weeks."
+    source: "src/markdown_optimizer/config.py:29 (FIXED_RULE_DEPTH = 0.30)"
+    figures: [F-17, F-18, F-20, F-21, F-44, F-47, F-48, F-53, F-57, F-58, F-60, F-61, F-62]
+    edit: ["src/markdown_optimizer/config.py:29"]
+    rerun: ["make run"]
+  - id: A-07
+    statement: "Plans are scored on the true demand curve with 400 paired negative-binomial demand draws per SKU-event (scorer seed 11, size 40, about 16% noise on a high-volume SKU), using the competitor prices that actually happened."
+    source: "src/markdown_optimizer/simulate.py:68-75 (draws=400, seed=11); data.py:22 (NB_SIZE = 40.0)"
+    figures: [F-15, F-19, F-20, F-26, F-28, F-43, F-44, F-46, F-47, F-53, F-54, F-56, F-57, F-58, F-60, F-61, F-62, F-63, F-64]
+    edit: ["src/markdown_optimizer/simulate.py:73-74", "src/markdown_optimizer/data.py:22"]
+    rerun: ["make run"]
+  - id: A-08
+    statement: "When planning, the competitor price index is held at its last observed value and competitors do not react to our markdowns. The scorer uses the prices that actually happened."
+    source: "src/markdown_optimizer/simulate.py:21-35 (model_demand); pipeline.py:73; README 'Known limitations'"
+    figures: [F-33, F-19, F-44, F-53]
+    edit: ["src/markdown_optimizer/simulate.py:21-35"]
+    rerun: ["make run"]
+  - id: A-09
+    statement: "The planner optimises expected demand, not a demand quantile; noise pushes some events below the 75% line (90.6% of events hit it vs 92.1% for the 30% rule)."
+    source: "src/markdown_optimizer/optimize.py:64-77; README 'Known limitations'"
+    figures: [F-51, F-56, F-57]
+    edit: ["src/markdown_optimizer/optimize.py"]
+    rerun: ["make run"]
+  - id: A-10
+    statement: "No cannibalisation or halo between SKUs; one price zone at chain level."
+    source: "README 'Known limitations'"
+    figures: [F-19, F-44, F-53]
+    edit: ["src/markdown_optimizer/data.py", "src/markdown_optimizer/simulate.py"]
+    rerun: ["make data", "make run"]
+  - id: A-11
+    statement: "True own-price elasticities are drawn around category means of -1.2 to -2.9 with between-SKU spread 0.4 (capped at -0.4); competitors match our promotions 35% of the time."
+    source: "src/markdown_optimizer/config.py:13-24; src/markdown_optimizer/data.py:110 (beta), :179 (match 0.35)"
+    figures: [F-36, F-37, F-38, F-39, F-40, F-41]
+    edit: ["src/markdown_optimizer/config.py:13-24", "src/markdown_optimizer/data.py:110"]
+    rerun: ["make data", "make run"]
+  - id: A-12
+    statement: "Video rounding: margins to whole currency units with thousands separators, percentages to whole numbers or 1 decimal, elasticity MAE to 3 decimals, elasticities to 2 decimals; '~10 s' and '3 years' are rounded labels."
+    source: "this audit (display convention)"
+    figures: [F-13, F-19, F-20, F-21, F-36, F-37, F-38, F-39, F-40, F-43, F-44, F-46, F-47, F-50, F-51, F-53, F-54, F-55, F-56, F-57, F-58, F-60, F-61, F-62, F-63, F-64]
+    edit: ["the composition file named on each slide"]
+    rerun: ["hyperframes render"]
+  - id: A-13
+    statement: "Slide 01 (industry, everyday problems) is general retail knowledge used as context. It is not a result of this repo and carries no numbers."
+    source: "author's framing; README 'The problem' supports all four problems"
+    figures: [F-01, F-02]
+    edit: ["compositions/s01-context.html"]
+    rerun: ["hyperframes render"]
+  - id: A-14
+    statement: "The 'make run ≈ 10 s' label is a single wall-clock measurement on the author's laptop (Apple M1 Pro), not a repo output; it varies with the machine."
+    source: "measured for this audit (time .venv/bin/markdown-optimizer)"
+    figures: [F-30]
+    edit: ["compositions/s03-architecture.html (#arch-nfr)", "compositions/s07-end.html (#endcard-run)"]
+    rerun: ["hyperframes render"]
+
+figures:
+  # ---- slide 01
+  - {id: F-01, slides: ["01"], label: "Industries that relate: grocery & convenience chains, fashion & apparel retail, home & general merchandise", shown: "3 industry chips", type: general-knowledge, source: "author's framing", key: "-", formula: "-", manual: "Context statement, not a repo output."}
+  - {id: F-02, slides: ["01"], label: "Four everyday problems (overbought stock; blanket discount; too deep gives margin away; too shallow leaves leftovers for a liquidator)", shown: "4 problem cards", type: general-knowledge, source: "README 'The problem'", key: "README lines 13-27", formula: "-",
+     check: {expr: "grep('README.md', r'overbought') and grep('README.md', r'30% off everything') and grep('README.md', r'gives away margin') and grep('README.md', r'liquidator')", fmt: bool}}
+  # ---- slide 02
+  - {id: F-03, slides: ["02", "05"], label: "SKUs", shown: "400 SKUs / seed 7 · 400 SKUs", type: direct, source: "data/skus.csv", key: "row count", formula: "-",
+     check: {expr: "len(R('data/skus.csv'))", fmt: "{:d}", expect: "400"}}
+  - {id: F-04, slides: ["02"], label: "Categories", shown: "12 categories", type: direct, source: "data/skus.csv", key: "category (distinct)", formula: "-",
+     check: {expr: "R('data/skus.csv')['category'].nunique()", fmt: "{:d}", expect: "12"}}
+  - {id: F-05, slides: ["02"], label: "Clearance events", shown: "3 events", type: direct, source: "data/events.csv", key: "event_id (distinct)", formula: "-",
+     check: {expr: "R('data/events.csv')['event_id'].nunique()", fmt: "{:d}", expect: "3"}}
+  - {id: F-06, slides: ["02"], label: "SKUs per event", shown: "× 100 slow movers", type: direct, source: "data/events.csv", key: "rows per event_id", formula: "min = max = 100",
+     check: {expr: "set(R('data/events.csv').groupby('event_id').size()) == {100}", fmt: bool}}
+  - {id: F-07, slides: ["02"], label: "Weeks of history", shown: "156 weeks", type: direct, source: "data/sales.csv", key: "t (distinct)", formula: "-",
+     check: {expr: "R('data/sales.csv')['t'].nunique()", fmt: "{:d}", expect: "156"}}
+  - {id: F-08, slides: ["02", "05"], label: "SKU-weeks of sales history", shown: "61,799 SKU-weeks / 61,799 rows", type: direct, source: "data/sales.csv", key: "row count (1% of SKU-weeks dropped as missing files)", formula: "-",
+     check: {expr: "len(R('data/sales.csv'))", fmt: "{:,d}", expect: "61,799"}}
+  - {id: F-09, slides: ["02", "05"], label: "Discount ladder", shown: "0–60% off", type: direct, source: "src/markdown_optimizer/config.py:28", key: "LADDER", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/config.py', r'LADDER: tuple\\[float, \\.\\.\\.\\] = \\(0\\.0, 0\\.10, 0\\.20, 0\\.30, 0\\.40, 0\\.50, 0\\.60\\)')", fmt: bool}}
+  - {id: F-10, slides: ["02", "03", "04"], label: "Event length", shown: "4-week events", type: direct, source: "data/events.csv", key: "weeks", formula: "all rows = 4",
+     check: {expr: "set(R('data/events.csv')['weeks']) == {4}", fmt: bool}}
+  - {id: F-11, slides: ["02"], label: "Salvage value of leftovers", shown: "leftovers go for 30% of cost", type: direct, source: "data/events.csv; config.py:38", key: "salvage_value vs unit_cost", formula: "salvage_value = round(0.30 x unit_cost, 2) on every row",
+     check: {expr: "bool((R('data/events.csv').eval('salvage_value - 0.3 * unit_cost').abs() <= 0.0051).all())", fmt: bool}}
+  - {id: F-12, slides: ["02"], label: "Clearance SKUs are slow movers", shown: "slow movers", type: direct, source: "src/markdown_optimizer/data.py:241-243", key: "slow = SKUs below the 60th percentile of base demand", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/data.py', r'slow = np\\.flatnonzero')", fmt: bool}}
+  # ---- slide 03
+  - {id: F-13, slides: ["03"], label: "3 years of sales history", shown: "3 years, every price change", type: derived, source: "data/sales.csv", key: "t (distinct)", formula: "156 weeks / 52 = 3 years",
+     check: {expr: "R('data/sales.csv')['t'].nunique() == 156", fmt: bool}}
+  - {id: F-14, slides: ["03", "04", "05"], label: "Markdown paths scored per SKU-event", shown: "score all 210 / 210 of them / 210 paths/SKU-event / scored 210 / 210", type: derived, source: "src/markdown_optimizer/optimize.py:25-27; config.py:28-34", key: "ladder_paths(4, 7)", formula: "non-decreasing sequences of 4 from 7 rungs = C(7+4-1, 4) = 210",
+     check: {expr: "n_paths()", fmt: "{:d}", expect: "210"}}
+  - {id: F-15, slides: ["03"], label: "Badges: more margin, stock clears, checked on truth", shown: "✓ more margin ✓ stock clears ✓ checked on truth", type: derived, source: "outputs/results.json; src/markdown_optimizer/simulate.py", key: "margin_partial_pooling > margin_fixed_30; sell_through_partial_pooling >= 0.75; simulate() scores on true_mean", formula: "-",
+     check: {expr: "J('outputs/results.json')['margin_partial_pooling'] > J('outputs/results.json')['margin_fixed_30'] and J('outputs/results.json')['sell_through_partial_pooling'] >= 0.75 and grep('src/markdown_optimizer/simulate.py', r'mu = np\\.diag\\(true_mean')", fmt: bool}}
+  - {id: F-16, slides: ["03", "04", "05", "07", "08"], label: "Sell-through target", shown: "CLEAR 75% / clears 75% / ≥ 75% sold? / target 75%", type: direct, source: "outputs/results.json", key: "sell_through_target", formula: "x 100",
+     check: {expr: "J('outputs/results.json')['sell_through_target'] * 100", fmt: "{:.0f}", expect: "75"}}
+  # ---- slide 04
+  - {id: F-17, slides: ["04", "07"], label: "SKU0222 (pasta & rice), event E1: plan 0/0/10/10%, margin 212 vs 5 for 30% off", shown: "SKU0222 0% 0% 10% 10% · 5 → 212", type: direct, source: "outputs/markdown_plan.csv", key: "event_id=E1, sku_id=SKU0222: depth_w1..w4, margin, fixed_30_margin", formula: "margins rounded to whole units",
+     check: {expr: "plan_row('E1', 'SKU0222') == ((0.0, 0.0, 0.1, 0.1), 212, 5)", fmt: bool}}
+  - {id: F-18, slides: ["04"], label: "SKU0138 (cereal), event E1: plan 30/40/40/40%, margin 346 vs 303 for 30% off", shown: "SKU0138 30% 40% 40% 40% · 303 → 346", type: direct, source: "outputs/markdown_plan.csv", key: "event_id=E1, sku_id=SKU0138", formula: "margins rounded to whole units",
+     check: {expr: "plan_row('E1', 'SKU0138') == ((0.3, 0.4, 0.4, 0.4), 346, 303)", fmt: bool}}
+  - {id: F-19, slides: ["04", "06", "08"], label: "Total promotional margin, per-SKU plan (partial pooling), 300 SKU-events", shown: "56,628", type: direct, source: "outputs/results.json", key: "margin_partial_pooling", formula: "-",
+     check: {expr: "J('outputs/results.json')['margin_partial_pooling']", fmt: "{:,.0f}", expect: "56,628"}}
+  - {id: F-20, slides: ["04", "06", "08"], label: "Total promotional margin, 30% rule", shown: "18,877", type: direct, source: "outputs/results.json", key: "margin_fixed_30", formula: "-",
+     check: {expr: "J('outputs/results.json')['margin_fixed_30']", fmt: "{:,.0f}", expect: "18,877"}}
+  - {id: F-21, slides: ["04"], label: "Share of SKU-events where the plan beats the 30% rule", shown: "71% of them beat the rule", type: direct, source: "outputs/markdown_summary.csv", key: "policy=partial_pooling, skus_better_than_fixed", formula: "x 100",
+     check: {expr: "row('outputs/markdown_summary.csv', policy='partial_pooling')['skus_better_than_fixed'] * 100", fmt: "{:.0f}", expect: "71"}}
+  - {id: F-22, slides: ["04", "05"], label: "The price never goes back up during an event", shown: "the price never goes back up / never back up", type: direct, source: "outputs/markdown_plan.csv; optimize.py:1-6", key: "depth_w1..w4 non-decreasing on all 300 rows", formula: "-",
+     check: {expr: "bool((R('outputs/markdown_plan.csv')[['depth_w1','depth_w2','depth_w3','depth_w4']].diff(axis=1).iloc[:, 1:] >= -1e-9).all().all())", fmt: bool}}
+  - {id: F-23, slides: ["03", "04", "05"], label: "Thin SKUs are steadied by their category (empirical-Bayes shrinkage towards the category mean)", shown: "thin products lean on their category / steadied by its category / EB shrinkage toward category", type: direct, source: "src/markdown_optimizer/elasticity.py:93-120", key: "dersimonian_laird, shrink(groups=category)", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/elasticity.py', r'def dersimonian_laird') and grep('src/markdown_optimizer/elasticity.py', r'shrink\\(base\\[\"beta\"\\], base\\[\"beta_se\"\\], base\\[\"category\"\\]')", fmt: bool}}
+  # ---- slide 05
+  - {id: F-24, slides: ["05"], label: "Every architecture box maps to a real file or function", shown: "generate_data.py, sales.csv, events.csv, features.py prepare(), Poisson GLM, EB shrinkage, fit_controls(), simulate.py planner's curve, optimize.py ladder search, markdown_plan.csv, data/truth/, lift.py, simulate.py scorer, results.json, report.md, cli.py", type: direct, source: "src/markdown_optimizer/*.py; scripts/; data/; outputs/", key: "see helper arch_boxes_exist()", formula: "-",
+     check: {expr: "arch_boxes_exist()", fmt: bool}}
+  - {id: F-25, slides: ["05"], label: "Fallback when no path reaches 75%: take the path that sells the most", shown: "no → else: max sell-through", type: direct, source: "src/markdown_optimizer/optimize.py:50-57", key: "choose()", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/optimize.py', r'best = sell_through\\.max\\(\\)')", fmt: bool}}
+  - {id: F-26, slides: ["05", "08"], label: "Seeds: data seed 7, scorer seed 11", shown: "seed 7 / seed 11", type: direct, source: "outputs/results.json; src/markdown_optimizer/simulate.py:74", key: "seed; simulate(seed=11)", formula: "-",
+     check: {expr: "J('outputs/results.json')['seed'] == 7 and grep('src/markdown_optimizer/simulate.py', r'seed: int = 11')", fmt: bool}}
+  - {id: F-27, slides: ["05"], label: "Past promotion weeks scored for lift", shown: "6,531 past promos", type: direct, source: "outputs/lift_summary.csv", key: "baseline=model, promotions", formula: "-",
+     check: {expr: "row('outputs/lift_summary.csv', baseline='model')['promotions']", fmt: "{:,d}", expect: "6,531"}}
+  - {id: F-28, slides: ["05", "08"], label: "Demand draws per SKU-event, 300 SKU-events", shown: "400 paired draws × 300 SKU-events", type: direct, source: "src/markdown_optimizer/pipeline.py:62; data/events.csv", key: "run(draws=400); events rows", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/pipeline.py', r'draws: int = 400') and grep('src/markdown_optimizer/cli.py', r'default=400') and len(R('data/events.csv')) == 300", fmt: bool}}
+  - {id: F-29, slides: ["05"], label: "CSV files written to outputs/ by make run", shown: "+ 7 CSVs", type: direct, source: "src/markdown_optimizer/cli.py:24-31", key: "to_csv(out / ...) calls", formula: "count",
+     check: {expr: "len(re.findall(r'to_csv\\(out /', T('src/markdown_optimizer/cli.py')))", fmt: "{:d}", expect: "7"}}
+  - {id: F-30, slides: ["05", "10"], label: "make run time", shown: "make run ≈ 10 s / ~10 s", type: illustrative, source: "measured for this audit", key: "-", formula: "9.9 s wall-clock, rounded",
+     manual: "Single wall-clock measurement on the author's laptop (A-14); the repo does not record a run time."}
+  - {id: F-31, slides: ["05"], label: "No network or model server", shown: "no network", type: direct, source: "src/markdown_optimizer/*.py; README 'Tests'", key: "no networking imports", formula: "-",
+     check: {expr: "not any(grep('src/markdown_optimizer/' + m + '.py', r'import (requests|urllib|http|socket)') for m in ['cli','config','data','elasticity','features','lift','optimize','pipeline','simulate']) and grep('README.md', r'no network and no model server')", fmt: bool}}
+  - {id: F-32, slides: ["05"], label: "True parameters are read only by evaluation code", shown: "data/truth/ · eval code only · sealed", type: direct, source: "src/markdown_optimizer/data.py:1-7; README 'The data'", key: "docstring + README", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/data.py', r'nothing under ``src`` reads them except the') and grep('README.md', r'read only by the\\s+evaluation code')", fmt: bool}}
+  - {id: F-33, slides: ["05"], label: "Planner holds the competitor index at its last observed value", shown: "competitor held flat", type: direct, source: "src/markdown_optimizer/simulate.py:21-35; pipeline.py:73", key: "model_demand(last_cpi)", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/simulate.py', r'last_cpi\\[ev\\[\"sku_id\"\\]\\]') and grep('src/markdown_optimizer/pipeline.py', r'\\[\"competitor_index\"\\]\\.last\\(\\)')", fmt: bool}}
+  - {id: F-34, slides: ["05"], label: "GLM details: Poisson IRLS, one fit per SKU, bulk-order outlier refit; 4 estimators scored", shown: "IRLS · one per SKU · bulk-order refit · 4 estimators", type: direct, source: "src/markdown_optimizer/elasticity.py:31-64; pipeline.py:16", key: "poisson_irls, fit_robust (OUTLIER_PEARSON = 5.0), ESTIMATORS", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/elasticity.py', r'def poisson_irls') and grep('src/markdown_optimizer/elasticity.py', r'OUTLIER_PEARSON = 5\\.0') and len(re.findall(r'\"\\w+\"', re.search(r'ESTIMATORS = \\[(.*)\\]', T('src/markdown_optimizer/pipeline.py')).group(1))) == 4", fmt: bool}}
+  - {id: F-35, slides: ["05"], label: "Seed sweep reruns everything on seeds 8-11", shown: "make sweep: seeds 8-11", type: direct, source: "Makefile; outputs/seed_sweep.csv", key: "seed column", formula: "-",
+     check: {expr: "sorted(R('outputs/seed_sweep.csv')['seed'].tolist()) == [7, 8, 9, 10, 11] and grep('Makefile', r'--sweep 4')", fmt: bool}}
+  # ---- slide 06
+  - {id: F-36, slides: ["06", "08", "09"], label: "Elasticity MAE, no pooling", shown: "0.385", type: direct, source: "outputs/results.json", key: "beta_mae_no_pooling", formula: "-",
+     check: {expr: "J('outputs/results.json')['beta_mae_no_pooling']", fmt: "{:.3f}", expect: "0.385"}}
+  - {id: F-37, slides: ["06", "08", "09"], label: "Elasticity MAE, partial pooling", shown: "0.279", type: direct, source: "outputs/results.json", key: "beta_mae_partial_pooling", formula: "-",
+     check: {expr: "J('outputs/results.json')['beta_mae_partial_pooling']", fmt: "{:.3f}", expect: "0.279"}}
+  - {id: F-38, slides: ["06"], label: "Elasticity MAE, fewest promotions (bottom third), no pooling", shown: "Fewest promotions: 0.497", type: direct, source: "outputs/elasticity_error.csv", key: "estimator=no_pooling, beta_mae_few_promos", formula: "-",
+     check: {expr: "row('outputs/elasticity_error.csv', estimator='no_pooling')['beta_mae_few_promos']", fmt: "{:.3f}", expect: "0.497"}}
+  - {id: F-39, slides: ["06"], label: "Elasticity MAE, fewest promotions, partial pooling", shown: "→ 0.321", type: direct, source: "outputs/elasticity_error.csv", key: "estimator=partial_pooling, beta_mae_few_promos", formula: "-",
+     check: {expr: "row('outputs/elasticity_error.csv', estimator='partial_pooling')['beta_mae_few_promos']", fmt: "{:.3f}", expect: "0.321"}}
+  - {id: F-40, slides: ["06", "08", "09"], label: "Elasticity error reduction from partial pooling", shown: "−28% error / −28% / cut elasticity error 28%", type: derived, source: "outputs/results.json", key: "beta_mae_partial_pooling, beta_mae_no_pooling", formula: "(0.2792 / 0.3854 - 1) x 100 = -27.6, rounded",
+     check: {expr: "(J('outputs/results.json')['beta_mae_partial_pooling'] / J('outputs/results.json')['beta_mae_no_pooling'] - 1) * 100", fmt: "{:.0f}", expect: "-28"}}
+  - {id: F-41, slides: ["06"], label: "Scatter: true vs estimated elasticity for all 400 SKUs, no pooling then partial pooling", shown: "400 points moving from 'alone' to 'pooled'", type: direct, source: "outputs/elasticity_by_sku.csv (inlined by tools/inject_running.py)", key: "beta_true, beta_hat for estimator in {no_pooling, partial_pooling}", formula: "values rounded to 3 decimals for drawing",
+     check: {expr: "running_data_matches()", fmt: bool}}
+  - {id: F-42, slides: ["06"], label: "Margin per clearance event (30% rule / per-SKU plan / knows the true curve): E1 8,675 / 20,673 / 22,190; E2 8,080 / 20,518 / 22,502; E3 2,122 / 15,437 / 17,681", shown: "9 bar values", type: direct, source: "outputs/markdown_by_event.csv (inlined by tools/inject_running.py)", key: "policy in {fixed_30, partial_pooling, oracle}, event_id, margin", formula: "-",
+     check: {expr: "event_bars_match()", fmt: bool}}
+  - {id: F-43, slides: ["06"], label: "Total 30% rule margin, summed over the three events", shown: "total 18,877", type: derived, source: "outputs/markdown_by_event.csv", key: "policy=fixed_30, margin", formula: "sum of E1..E3",
+     check: {expr: "R('outputs/markdown_by_event.csv').query('policy == \"fixed_30\"')['margin'].sum()", fmt: "{:,.0f}", expect: "18,877"}}
+  - {id: F-44, slides: ["06"], label: "Total plan margin, summed over the three events", shown: "→ 56,628", type: derived, source: "outputs/markdown_by_event.csv", key: "policy=partial_pooling, margin", formula: "sum of E1..E3",
+     check: {expr: "R('outputs/markdown_by_event.csv').query('policy == \"partial_pooling\"')['margin'].sum()", fmt: "{:,.0f}", expect: "56,628"}}
+  # ---- slide 07
+  - {id: F-45, slides: ["07"], label: "Markdown sheet rows (SKU, category, stock, elasticity, W1-W4 depths, expected sold, margin, 30% off) for SKU0222, SKU0315, SKU0195, SKU0271, SKU0199, SKU0169", shown: "6 sheet rows", type: direct, source: "demo:assets/markdown_sheet.json (tools/export_markdown_sheet.py) = outputs/markdown_plan.csv rows for E1", key: "see helper sheet_rows_match()", formula: "-",
+     check: {expr: "sheet_rows_match()", fmt: bool}}
+  - {id: F-46, slides: ["07"], label: "Event E1 margin, per-SKU plan", shown: "margin 20,673", type: direct, source: "outputs/markdown_by_event.csv", key: "policy=partial_pooling, event_id=E1", formula: "-",
+     check: {expr: "row('outputs/markdown_by_event.csv', policy='partial_pooling', event_id='E1')['margin']", fmt: "{:,.0f}", expect: "20,673"}}
+  - {id: F-47, slides: ["07"], label: "Event E1 margin, 30% rule", shown: "vs 8,675 at 30% off", type: direct, source: "outputs/markdown_by_event.csv", key: "policy=fixed_30, event_id=E1", formula: "-",
+     check: {expr: "row('outputs/markdown_by_event.csv', policy='fixed_30', event_id='E1')['margin']", fmt: "{:,.0f}", expect: "8,675"}}
+  - {id: F-48, slides: ["07"], label: "E1 SKUs where the plan beats the 30% rule", shown: "76 SKUs do better", type: derived, source: "outputs/markdown_plan.csv", key: "event_id=E1, margin > fixed_30_margin", formula: "count",
+     check: {expr: "int((R('outputs/markdown_plan.csv').query('event_id == \"E1\"').eval('margin > fixed_30_margin')).sum())", fmt: "{:d}", expect: "76"}}
+  - {id: F-49, slides: ["07"], label: "SKUs in event E1", shown: "100 SKUs · + 94 more SKUs", type: direct, source: "data/events.csv", key: "event_id=E1 rows", formula: "100 - 6 shown = 94",
+     check: {expr: "len(R('data/events.csv').query('event_id == \"E1\"'))", fmt: "{:d}", expect: "100"}}
+  - {id: F-50, slides: ["07"], label: "ELAST column = partial-pooling elasticity estimate (example SKU0222)", shown: "−0.67", type: direct, source: "outputs/elasticity_by_sku.csv", key: "sku_id=SKU0222, estimator=partial_pooling, beta_hat", formula: "-",
+     check: {expr: "row('outputs/elasticity_by_sku.csv', sku_id='SKU0222', estimator='partial_pooling')['beta_hat']", fmt: "{:.2f}", expect: "-0.67"}}
+  - {id: F-51, slides: ["07"], label: "SOLD* = the plan's expected sell-through (example SKU0271, the tightest: just over the 75% line)", shown: "75% / 75% sold", type: direct, source: "outputs/markdown_plan.csv", key: "event_id=E1, sku_id=SKU0271, planned_sell_through", formula: "x 100",
+     check: {expr: "row('outputs/markdown_plan.csv', event_id='E1', sku_id='SKU0271')['planned_sell_through'] * 100", fmt: "{:.0f}", expect: "75"}}
+  - {id: F-52, slides: ["07"], label: "Shelf scene: 10 boxes per SKU stand for its opening stock; boxes leave each week in proportion to the plan's expected stock left (planned_stock_left in the export)", shown: "shelf animation", type: illustrative, source: "demo:assets/markdown_sheet.json", key: "planned_stock_left", formula: "boxes left = round(10 x expected stock left)",
+     manual: "Drawing; the proportions come from the planner's expected demand, not from realised sales."}
+  # ---- slide 08
+  - {id: F-53, slides: ["08"], label: "Margin multiple over the 30% rule", shown: "3.0×", type: derived, source: "outputs/results.json", key: "margin_partial_pooling / margin_fixed_30", formula: "56,628 / 18,877 = 3.0",
+     check: {expr: "J('outputs/results.json')['margin_partial_pooling'] / J('outputs/results.json')['margin_fixed_30']", fmt: "{:.1f}", expect: "3.0"}}
+  - {id: F-54, slides: ["08"], label: "Share of the headroom to a planner that knows the true curve", shown: "87%", type: direct, source: "outputs/results.json", key: "oracle_headroom_captured", formula: "x 100",
+     check: {expr: "J('outputs/results.json')['oracle_headroom_captured'] * 100", fmt: "{:.0f}", expect: "87"}}
+  - {id: F-55, slides: ["08"], label: "Upper bound margin (planner knows the true curve)", shown: "upper bound 62,373", type: direct, source: "outputs/results.json", key: "margin_oracle", formula: "-",
+     check: {expr: "J('outputs/results.json')['margin_oracle']", fmt: "{:,.0f}", expect: "62,373"}}
+  - {id: F-56, slides: ["08"], label: "Sell-through, per-SKU plan", shown: "92.0%", type: direct, source: "outputs/results.json", key: "sell_through_partial_pooling", formula: "x 100",
+     check: {expr: "J('outputs/results.json')['sell_through_partial_pooling'] * 100", fmt: "{:.1f}", expect: "92.0"}}
+  - {id: F-57, slides: ["08"], label: "Sell-through, 30% rule", shown: "30% rule sells 93.0%", type: direct, source: "outputs/results.json", key: "sell_through_fixed_30", formula: "x 100",
+     check: {expr: "J('outputs/results.json')['sell_through_fixed_30'] * 100", fmt: "{:.1f}", expect: "93.0"}}
+  # ---- slide 09
+  - {id: F-58, slides: ["09"], label: "Margin gain over the 30% rule, best blanket depth chosen with hindsight", shown: "+23,884", type: direct, source: "outputs/markdown_summary.csv", key: "policy=best_blanket_depth_hindsight, margin_vs_fixed_30", formula: "-",
+     check: {expr: "row('outputs/markdown_summary.csv', policy='best_blanket_depth_hindsight')['margin_vs_fixed_30']", fmt: "{:,.0f}", expect: "23,884"}}
+  - {id: F-59, slides: ["09"], label: "Best blanket depth", shown: "20%, picked with hindsight", type: direct, source: "outputs/results.json", key: "best_blanket_depth", formula: "x 100",
+     check: {expr: "J('outputs/results.json')['best_blanket_depth'] * 100", fmt: "{:.0f}", expect: "20"}}
+  - {id: F-60, slides: ["09"], label: "Margin gain over the 30% rule, per SKU, no pooling", shown: "+36,705", type: direct, source: "outputs/markdown_summary.csv", key: "policy=no_pooling, margin_vs_fixed_30", formula: "-",
+     check: {expr: "row('outputs/markdown_summary.csv', policy='no_pooling')['margin_vs_fixed_30']", fmt: "{:,.0f}", expect: "36,705"}}
+  - {id: F-61, slides: ["09"], label: "Margin gain over the 30% rule, per SKU, partial pooling", shown: "+37,750", type: direct, source: "outputs/markdown_summary.csv", key: "policy=partial_pooling, margin_vs_fixed_30", formula: "-",
+     check: {expr: "row('outputs/markdown_summary.csv', policy='partial_pooling')['margin_vs_fixed_30']", fmt: "{:,.0f}", expect: "37,750"}}
+  - {id: F-62, slides: ["09"], label: "Margin gain over the 30% rule, planner that knows the true curve", shown: "+43,496", type: direct, source: "outputs/markdown_summary.csv", key: "policy=oracle, margin_vs_fixed_30", formula: "-",
+     check: {expr: "row('outputs/markdown_summary.csv', policy='oracle')['margin_vs_fixed_30']", fmt: "{:,.0f}", expect: "43,496"}}
+  - {id: F-63, slides: ["09"], label: "Extra margin of partial pooling over no pooling", shown: "1,046", type: direct, source: "outputs/pooling_comparison.csv", key: "comparison='partial_pooling - no_pooling', margin_difference", formula: "-",
+     check: {expr: "row('outputs/pooling_comparison.csv', comparison='partial_pooling - no_pooling')['margin_difference']", fmt: "{:,.0f}", expect: "1,046"}}
+  - {id: F-64, slides: ["09"], label: "95% interval half-width of that difference (paired over SKU-events)", shown: "± 1,042", type: direct, source: "outputs/pooling_comparison.csv", key: "comparison='partial_pooling - no_pooling', ci95_halfwidth", formula: "1.96 x sd x sqrt(n)",
+     check: {expr: "row('outputs/pooling_comparison.csv', comparison='partial_pooling - no_pooling')['ci95_halfwidth']", fmt: "{:,.0f}", expect: "1,042"}}
+  - {id: F-65, slides: ["09"], label: "The gain comes from deciding per SKU with a clearance floor", shown: "The gain comes from deciding per SKU with a clearance floor.", type: direct, source: "README 'The result'", key: "README sentence", formula: "-",
+     check: {expr: "grep('README.md', r'Most of the gain comes from making the\\s+decision per SKU with a\\s+clearance constraint')", fmt: bool}}
+  # ---- slide 10
+  - {id: F-66, slides: ["10"], label: "Licence", shown: "MIT", type: direct, source: "LICENSE", key: "first line", formula: "-",
+     check: {expr: "grep('LICENSE', r'^MIT License')", fmt: bool}}
+  - {id: F-67, slides: ["10"], label: "Stack chips: Poisson GLM, empirical Bayes, exhaustive ladder search, pandas", shown: "Poisson GLM · empirical Bayes · exhaustive ladder search · pandas", type: direct, source: "src/markdown_optimizer/elasticity.py; optimize.py; pyproject.toml", key: "docstrings + dependencies", formula: "-",
+     check: {expr: "grep('src/markdown_optimizer/elasticity.py', r'Poisson GLM') and grep('src/markdown_optimizer/elasticity.py', r'empirical-Bayes') and grep('src/markdown_optimizer/optimize.py', r'every one is scored') and grep('pyproject.toml', r'\"pandas')", fmt: bool}}
+
+slides:
+  - id: "01"
+    title: "The industry"
+    image: slides/slide-01.jpg
+    time: "0.0-7.2 s"
+    composition: "compositions/s01-context.html"
+    text:
+      - "01 · THE INDUSTRY"
+      - "Every season ends with stock nobody is buying."
+      - "WHO LIVES WITH THIS · Grocery & convenience chains · Fashion & apparel retail · Home & general merchandise"
+      - "01 Overbought seasonal and slow-moving stock — A few weeks of shelf space left to sell it"
+      - "02 One blanket discount for every product — Easy to run, wrong in both directions"
+      - "03 Too deep: margin given away — The shelf empties, so nobody notices"
+      - "04 Too shallow: leftovers written off — Sold to a liquidator below cost"
+      - "THIS PROJECT tackles all four, one product at a time · measure → plan → check on known demand"
+    assumptions: [A-13]
+    illustrative: ["The whole slide is context; no repo figures."]
+    change: "Edit the chips (#ctx-c1..3) and cards (#ctx-k1..4) in compositions/s01-context.html."
+  - id: "02"
+    title: "This project"
+    image: slides/slide-02.jpg
+    time: "6.8-11.6 s"
+    composition: "compositions/s02-hook.html"
+    text:
+      - "02 · THIS PROJECT"
+      - "400 SKUs, 12 categories. 3 events × 100 slow movers. How deep should each one go?"
+      - "156 weeks · 61,799 SKU-weeks of sales · 0–60% off, 4-week events · leftovers go for 30% of cost"
+    assumptions: [A-01, A-04, A-05]
+    illustrative: ["Rings in the background are decoration."]
+    change: "Headline spans #hook-l1..l3 and chips #hook-f1..f3 in compositions/s02-hook.html; sizes come from src/markdown_optimizer/config.py."
+  - id: "03"
+    title: "How it works (white chapter, slide A)"
+    image: slides/slide-03.jpg
+    time: "11.3-19.3 s"
+    composition: "compositions/explainer.html (CONFIG.blocks, CONFIG.groups, CONFIG.loop)"
+    text:
+      - "03 · HOW IT WORKS"
+      - "From history to a markdown plan"
+      - "SALES HISTORY 3 years, every price change → [LEARN FROM HISTORY: PRICE EFFECT how much does price move sales? → BORROW thin products lean on their category] → [EVERY CLEARANCE EVENT: TRY EVERY PATH each 4-week markdown, scored → CLEAR 75% enough stock must sell] → MARKDOWN PLAN ✓ more margin ✓ stock clears ✓ checked on truth"
+      - "score all 210, keep the best (loop over TRY EVERY PATH)"
+    assumptions: [A-03, A-05, A-07]
+    illustrative: ["Icons and colours are a visual language, not data."]
+    change: "Edit CONFIG in compositions/explainer.html; badge truth comes from results.json (F-15)."
+  - id: "04"
+    title: "The key idea (white chapter, slide B)"
+    image: slides/slide-04.jpg
+    time: "19.3-26.3 s"
+    composition: "compositions/explainer.html (#ex-b ...)"
+    text:
+      - "04 · THE KEY IDEA"
+      - "Its own markdown for every product"
+      - "Measure how much price moves each product's sales — from its own promotions, steadied by its category"
+      - "Try every 4-week markdown path — 210 of them; the price never goes back up"
+      - "Keep the most profitable one that still clears 75% — the stock has to go either way"
+      - "TWO REAL SKUS · CLEARANCE E1 — SKU0222 pasta & rice: 30% ×4 (margin 5) vs 0% 0% 10% 10% (212); SKU0138 cereal: 30% ×4 (303) vs 30% 40% 40% 40% (346)"
+      - "Grey: 30% off every week. Green: its own path, shallower for one and deeper for the other. Both earn more."
+      - "All 300 SKU-events: 56,628 margin vs 18,877 for 30% off; 71% of them beat the rule."
+    assumptions: [A-02, A-03, A-05, A-06, A-07]
+    illustrative: ["The two SKUs were picked to show one shallower and one deeper path than 30%; 29% of SKU-events do not beat the rule (F-21)."]
+    change: "Markup under #ex-b in compositions/explainer.html; the SKU rows are F-17/F-18, the footnote F-19/F-20/F-21."
+  - id: "05"
+    title: "Architecture"
+    image: slides/slide-05.jpg
+    time: "26.0-43.0 s"
+    composition: "compositions/s03-architecture.html (N = nodes, W = wires)"
+    text:
+      - "05 · ARCHITECTURE"
+      - "History in, a markdown plan out, graded on a sealed truth."
+      - "Layers: SOURCES · FEATURES · MODELS · DECISION · OUTPUTS · cli.py; band: EVALUATION · OFFLINE, ON SEALED TRUTH"
+      - "generate_data.py Seeded generator (seed 7 · 400 SKUs) → sales.csv (61,799 SKU-weeks), events.csv (300 SKU-events), data/truth/ (true β, γ, prices · eval code only)"
+      - "sales.csv —61,799 rows→ features.py prepare() (comp. gaps filled · post-promo flag · Fourier season) —design matrix→ elasticity.py: Poisson GLM (IRLS · one per SKU · bulk-order refit) —β̂ ± se→ EB shrinkage (DerSimonian-Laird · toward category) —pooled β, γ→ fit_controls() (β, γ held fixed · refit season, promo)"
+      - "—coefs→ simulate.py Planner's curve (competitor held flat) —E[units]→ optimize.py Ladder search (210 paths/SKU-event · 0-60%, never back up · exhaustive, no solver · scored 210 / 210) → ≥ 75% sold? —yes→ markdown_plan.csv (4 weekly depths) —review→ Pricing analyst (outside repo); —no→ else: max sell-through"
+      - "events.csv —stock · cost · salvage→ ladder search; fit_controls —model baseline→ lift.py Promo lift (6,531 past promos); data/truth —true curve + real prices→ simulate.py Score every plan on the true curve (400 paired draws × 300 SKU-events · seed 11; no markdown · 30% rule · 4 estimators · best blanket · oracle); markdown_plan —all plans→ scorer —margin · CI→ results.json (report.md + 7 CSVs) ··make sweep: seeds 8-11··> generator"
+      - "batch CLI · make run ≈ 10 s · no network; critical path: sales.csv → markdown_plan.csv"
+    assumptions: [A-01, A-03, A-05, A-07, A-08, A-14]
+    illustrative: ["Packets moving along the wires show execution order, not data volumes or timing.", "'Pricing analyst · outside repo' is the consumer of the plan; the repo has no review step.", "Solid = batch data flow, dashed = sealed truth or human hand-off, dotted = seed-sweep loop."]
+    change: "Node table N and wire table W in compositions/s03-architecture.html; each box is checked by arch_boxes_exist() (F-24)."
+  - id: "06"
+    title: "The system running"
+    image: slides/slide-06a.jpg
+    image2: slides/slide-06b.jpg
+    time: "42.6-57.2 s"
+    composition: "compositions/s04-running.html (DATA block injected by tools/inject_running.py)"
+    text:
+      - "06 · THE SYSTEM RUNNING"
+      - "400 elasticities, estimated alone, then pooled."
+      - "Scatter: true elasticity (known from the generator) vs estimated; perfect estimate line; MEAN ABSOLUTE ERROR VS TRUTH 0.385 (each SKU on its own) → 0.279 (partial pooling); Fewest promotions: 0.497 → 0.321; −28% error"
+      - "MARGIN PER CLEARANCE EVENT · SCORED ON THE TRUE DEMAND CURVE — E1 2026-01-26: 8,675 / 20,673 / 22,190; E2 2026-04-20: 8,080 / 20,518 / 22,502; E3 2026-07-13: 2,122 / 15,437 / 17,681"
+      - "30% off everything · per-SKU plan · knows the true curve · total 18,877 → 56,628"
+    assumptions: [A-02, A-07, A-11]
+    illustrative: ["The repo writes no plots; both charts are drawn by the video from the CSVs, values unchanged (F-41, F-42)."]
+    change: "Re-run make run, then tools/inject_running.py; layout in compositions/s04-running.html."
+  - id: "07"
+    title: "End-user value (white)"
+    image: slides/slide-07.jpg
+    time: "56.9-69.9 s"
+    composition: "compositions/value.html (SHEET block injected by tools/inject_sheet.py)"
+    text:
+      - "07 · END-USER VALUE"
+      - "What the pricing analyst gets"
+      - "MARKDOWN PLAN · CLEARANCE E1 · WEEK OF 2026-01-26 — columns SKU, CATEGORY, STOCK, ELAST, W1, W2, W3, W4, SOLD*, MARGIN, 30% OFF"
+      - "SKU0222 pasta and rice 463 −0.67 0% 0% 10% 10% 97% 212 5"
+      - "SKU0315 beverages 561 −2.37 10% 10% 10% 10% 98% 536 112"
+      - "SKU0195 snacks 870 −2.43 20% 20% 30% 30% 99% 292 190"
+      - "SKU0271 condiments 218 −0.86 10% 10% 10% 50% 75% −86 −111"
+      - "SKU0199 bakery 956 −1.50 40% 50% 50% 50% 99% −225 −178"
+      - "SKU0169 household cleaning 1,133 −1.54 10% 10% 20% 20% 100% 2,083 1,054"
+      - "+ 94 more SKUs · * expected share of stock sold · ✓ 100 SKUs · margin 20,673 vs 8,675 at 30% off · 76 SKUs do better"
+      - "STORE SHELF · EXPECTED SALES — price tags full → weekly depth, WEEK 1-4, 97% / 98% / 99% / 75% sold"
+      - "Every SKU gets its own price path for the next four weeks. More margin, and the shelf still clears."
+    assumptions: [A-03, A-04, A-06, A-07, A-08, A-09]
+    illustrative: ["Analyst figure, shelf, 10 boxes per SKU and tag drawings are illustrative (F-52).", "The 6 rows were picked to show a range of paths, including one SKU (SKU0199) where the plan loses to 30% off.", "MARGIN and 30% OFF are scored on the true demand curve; SOLD* is the planner's expectation."]
+    change: "Re-run tools/export_markdown_sheet.py, then tools/inject_sheet.py (--rows / --animate pick the SKUs); layout in compositions/value.html."
+  - id: "08"
+    title: "Results"
+    image: slides/slide-08.jpg
+    time: "69.6-78.4 s"
+    composition: "compositions/s05-results.html (stats array)"
+    text:
+      - "08 · RESULTS · 300 SKU-EVENTS, TRUE DEMAND"
+      - "Triple the margin of 30% off, and the stock still clears."
+      - "OPTIMIZER 3.0× margin of the 30% rule · 18,877 → 56,628"
+      - "OPTIMIZER 87% of the headroom to a perfect planner · upper bound 62,373"
+      - "ELASTICITY −28% elasticity error with pooling · MAE 0.385 → 0.279"
+      - "CLEARANCE 92.0% of stock sold (target 75%) · 30% rule sells 93.0%"
+      - "400 paired demand draws per SKU-event · seed 7 · plans never see the true curve"
+    assumptions: [A-02, A-03, A-06, A-07, A-09]
+    illustrative: ["Mini bars: card 1 = margin / upper bound (from 30% rule to plan), card 2 = share captured, card 3 = MAE after / before, card 4 = share sold."]
+    change: "The stats array and card text in compositions/s05-results.html."
+  - id: "09"
+    title: "What didn't win"
+    image: slides/slide-09.jpg
+    time: "78.0-84.8 s"
+    composition: "compositions/s06-twist.html"
+    text:
+      - "09 · WHAT DIDN'T WIN"
+      - "Better elasticities barely move the money."
+      - "Margin gained over the 30% rule, 300 SKU-events, true demand curve"
+      - "Best blanket depth (20%, picked with hindsight) +23,884 · Per SKU, no pooling (elasticity MAE 0.385) +36,705 · Per SKU, partial pooling (elasticity MAE 0.279) +37,750 · Knows the true curve (upper bound) +43,496"
+      - "Pooling cut elasticity error 28% but added only 1,046 ± 1,042 margin over no pooling. The gain comes from deciding per SKU with a clearance floor."
+    assumptions: [A-02, A-06, A-07]
+    illustrative: ["Bar lengths: 1,000 px track = +43,496 (the upper bound)."]
+    change: "Rows #twist-r1..r4 (bar widths are inline styles) in compositions/s06-twist.html."
+  - id: "10"
+    title: "End card"
+    image: slides/slide-10.jpg
+    time: "84.4-88.8 s"
+    composition: "compositions/s07-end.html"
+    text:
+      - "10 · OPEN SOURCE · MIT · RUNS ON A LAPTOP"
+      - "markdown-optimizer"
+      - "github.com/kavya2693/markdown-optimizer"
+      - "Poisson GLM · empirical Bayes · exhaustive ladder search · pandas"
+      - "$ make run   # 400 SKUs, 300 SKU-events, ~10 s"
+    assumptions: [A-14]
+    illustrative: ["Faded grid on the right is outputs/markdown_plan.csv drawn as a heatmap (rows = SKU-events by event, columns = weeks, darker = deeper), by tools/plan_heatmap.py."]
+    change: "Text in compositions/s07-end.html; heatmap from tools/plan_heatmap.py."
+
+caveats:
+  - "All data is synthetic and the generator shares the estimator's constant-elasticity form, so the evaluation cannot catch a wrong functional form (README 'Known limitations', biggest gap)."
+  - "The two SKUs on slide 04 and the six rows on slide 07 are chosen examples; 29% of SKU-events do worse than or tie the 30% rule (F-21), and slide 07 includes one such SKU (SKU0199)."
+  - "SOLD* on slide 07 and the shelf animation use the planner's expected demand; MARGIN and 30% OFF are realised means over 400 draws on the true curve."
+  - "The plan sells through slightly less than the 30% rule (92.0% vs 93.0%) and hits the 75% target on 90.6% of events vs 92.1% (README 'The result'); slide 08 shows the sell-through pair."
+  - "'make run ≈ 10 s' is one measurement on the author's laptop (A-14)."
+  - "The repo writes no plots; slide 06 charts are drawn by the video from the output CSVs (values unchanged)."
+  - "Slide 01 statements are general retail knowledge (A-13)."
+  - "'Pricing analyst · outside repo' on slide 05 marks the consumer of the plan; the repo has no human review step."
+
+stills:
+  master: renders/markdown-optimizer-master.mp4   # relative to demo_dir
+  width: 1600
+  times: {"01": 6.4, "02": 11.1, "03": 18.9, "04": 25.4, "05": 39.2, "06a": 49.5, "06b": 56.6, "07": 68.6, "08": 77.8, "09": 84.2, "10": 88.6}
+
+# Extra check helpers (Python), available to check expressions.
+helpers: |
+  import re as _re
+  from itertools import combinations_with_replacement as _cwr
+
+  def n_paths():
+      """Ladder paths per SKU-event from the rungs in config.py and the 4-week event length."""
+      cfg = T('src/markdown_optimizer/config.py')
+      rungs = _re.search(r'LADDER: tuple\[float, \.\.\.\] = \(([^)]*)\)', cfg).group(1).split(',')
+      weeks = int(_re.search(r'event_weeks: int = (\d+)', cfg).group(1))
+      return len(list(_cwr(range(len(rungs)), weeks)))
+
+  def plan_row(event, sku):
+      r = row('outputs/markdown_plan.csv', event_id=event, sku_id=sku)
+      return (tuple(round(float(r[f'depth_w{w}']), 2) for w in range(1, 5)), round(float(r['margin'])), round(float(r['fixed_30_margin'])))
+
+  def arch_boxes_exist():
+      src = 'src/markdown_optimizer/'
+      need = [
+          ('scripts/generate_data.py', r'def main'), (src + 'data.py', r'def generate\('),
+          (src + 'features.py', r'def prepare\('), (src + 'elasticity.py', r'def poisson_irls\('),
+          (src + 'elasticity.py', r'def fit_robust\('), (src + 'elasticity.py', r'def shrink\('),
+          (src + 'elasticity.py', r'def dersimonian_laird\('), (src + 'elasticity.py', r'def fit_controls\('),
+          (src + 'simulate.py', r'def model_demand\('), (src + 'optimize.py', r'def ladder_paths\('),
+          (src + 'optimize.py', r'def score_paths\('), (src + 'optimize.py', r'def choose\('),
+          (src + 'lift.py', r'def evaluate_lift\('), (src + 'simulate.py', r'def simulate\('),
+          (src + 'cli.py', r'def write_outputs\('), (src + 'cli.py', r'markdown_plan\.csv'),
+          (src + 'cli.py', r'results\.json'), (src + 'cli.py', r'report\.md'),
+          (src + 'data.py', r'truth" / "sku_params\.csv'), (src + 'data.py', r'future_competitor_index\.csv'),
+      ]
+      ok = all(grep(p, rx) for p, rx in need)
+      files = ['data/sales.csv', 'data/events.csv', 'data/truth/sku_params.csv', 'outputs/markdown_plan.csv', 'outputs/results.json', 'outputs/report.md']
+      return ok and all(len(T(f)) > 0 for f in files)
+
+  def _block(path, name):
+      html = T(path)
+      m = _re.search(r'const ' + name + r' = (\{.*?\}); /\* ' + name + r':END', html, _re.S)
+      return json.loads(m.group(1))
+
+  def running_data_matches():
+      """The DATA block in s04-running.html equals outputs/elasticity_by_sku.csv (rounded to 3 dp)."""
+      d = _block('demo:compositions/s04-running.html', 'DATA')
+      e = R('outputs/elasticity_by_sku.csv')
+      w = e.pivot(index='sku_id', columns='estimator', values='beta_hat')
+      t = e.drop_duplicates('sku_id').set_index('sku_id')['beta_true']
+      want = [[round(float(t[s]), 3), round(float(w.at[s, 'no_pooling']), 3), round(float(w.at[s, 'partial_pooling']), 3)] for s in sorted(w.index)]
+      return d['pts'] == want and len(want) == 400
+
+  def event_bars_match():
+      d = _block('demo:compositions/s04-running.html', 'DATA')
+      for ev in d['events']:
+          for p in ('fixed_30', 'partial_pooling', 'oracle'):
+              if abs(ev[p] - float(row('outputs/markdown_by_event.csv', policy=p, event_id=ev['event_id'])['margin'])) > 0.006:
+                  return False
+      return [e['event_id'] for e in d['events']] == ['E1', 'E2', 'E3']
+
+  def sheet_rows_match():
+      """value.html SHEET rows == exported sheet == outputs/markdown_plan.csv (E1), and the event totals match."""
+      sheet = _block('demo:compositions/value.html', 'SHEET')
+      exp = {r['sku_id']: r for r in J('demo:assets/markdown_sheet.json')['rows']}
+      plan = R('outputs/markdown_plan.csv').query('event_id == "E1"').set_index('sku_id')
+      el = R('outputs/elasticity_by_sku.csv').query('estimator == "partial_pooling"').set_index('sku_id')['beta_hat']
+      ev = R('data/events.csv').query('event_id == "E1"').set_index('sku_id')
+      for r in sheet['rows']:
+          s = r['sku_id']
+          x, p = exp[s], plan.loc[s]
+          if any(r[k] != x[k] for k in ('depths', 'margin', 'fixed_30_margin', 'planned_sell_through', 'opening_stock', 'elasticity')):
+              return False
+          if r['depths'] != [round(float(p[f'depth_w{w}']), 2) for w in range(1, 5)]:
+              return False
+          if abs(r['margin'] - p['margin']) > 0.006 or abs(r['fixed_30_margin'] - p['fixed_30_margin']) > 0.006:
+              return False
+          if abs(r['planned_sell_through'] - p['planned_sell_through']) > 0.0001 or r['opening_stock'] != int(ev.at[s, 'opening_stock']):
+              return False
+          if abs(r['elasticity'] - el[s]) > 0.0006:
+              return False
+      by = R('outputs/markdown_by_event.csv')
+      tot_ok = abs(sheet['margin'] - float(by.query('policy == "partial_pooling" and event_id == "E1"')['margin'].iat[0])) < 0.01
+      tot_ok = tot_ok and abs(sheet['fixed_30_margin'] - float(by.query('policy == "fixed_30" and event_id == "E1"')['margin'].iat[0])) < 0.01
+      return tot_ok and [r['sku_id'] for r in sheet['rows']] == ['SKU0222', 'SKU0315', 'SKU0195', 'SKU0271', 'SKU0199', 'SKU0169']

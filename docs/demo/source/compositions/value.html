@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /* WHITE "END-USER VALUE" SLIDE: the artifact the user plans with (left) + a small 2D scene of the
+           person using it (right). Data is inlined by tools/inject_sheet.py between the SHEET markers. */
+        #value-root {
+          position: absolute; inset: 0;
+          --w-bg: #ffffff; --w-ink: #111827; --w-soft: #4b5563; --w-mute: #6b7280; --w-line: #d1d5db; --w-faint: #f3f4f6;
+          --w-data: #d97706; --w-model: #6d3cf0; --w-tools: #1f8fa8; --w-risk: #dc2b4a; --w-opt: #0f9f6e;
+          color: var(--w-ink); font-family: Inter, "Helvetica Neue", sans-serif;
+        }
+        #value-root .page { position: absolute; inset: 0; background: var(--w-bg); }
+        #value-root .edge { position: absolute; top: 0; width: 10px; height: 1080px; background: var(--w-opt); }
+        #value-root .kick {
+          position: absolute; left: 120px; top: 84px; font-family: "JetBrains Mono", monospace; font-size: 24px;
+          font-weight: 700; letter-spacing: 0.18em; color: var(--w-mute);
+        }
+        #value-root .ttl {
+          position: absolute; left: 120px; top: 124px; font-family: Montserrat, sans-serif; font-weight: 900;
+          font-size: 68px; letter-spacing: -0.02em; white-space: nowrap;
+        }
+        #value-root .ttl em { font-style: normal; color: var(--w-opt); }
+        #value-root .uline { position: absolute; left: 124px; top: 222px; width: 120px; height: 10px; border-radius: 5px; background: var(--w-opt); transform-origin: left center; }
+
+        /* sheet */
+        #value-root .sheet {
+          position: absolute; left: 120px; top: 280px; width: 1080px; height: 640px; border: 3px solid var(--w-line);
+          border-radius: 24px; background: #fff; box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08); overflow: hidden;
+        }
+        #value-root .sheet-head {
+          height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+          background: var(--w-ink); color: #fff; font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 700; letter-spacing: 0.08em;
+        }
+        #value-root .sheet-head span:last-child { color: #6ee7b7; }
+        #value-root .row {
+          position: relative; display: flex; align-items: center; height: 66px; padding: 0 22px;
+          font-family: "JetBrains Mono", monospace; font-size: 21px; color: var(--w-ink); border-bottom: 2px solid var(--w-faint);
+        }
+        #value-root .row.hdr { height: 54px; font-size: 18px; font-weight: 700; letter-spacing: 0.06em; color: var(--w-mute); background: #fafafa; }
+        #value-root .row .tint { position: absolute; inset: 0; opacity: 0; }
+        #value-root .c { position: relative; white-space: nowrap; }
+        #value-root .c1 { width: 126px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        #value-root .c1 i { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--w-line); }
+        #value-root .c2 { width: 206px; font-family: Inter, sans-serif; font-size: 20px; color: var(--w-soft); }
+        #value-root .c3 { width: 84px; text-align: right; padding-right: 12px; }
+        #value-root .c4 { width: 76px; text-align: right; padding-right: 16px; color: var(--w-model); }
+        #value-root .wk { width: 62px; display: flex; justify-content: center; }
+        #value-root .wk b {
+          display: block; width: 54px; height: 34px; border-radius: 8px; text-align: center; line-height: 34px;
+          font-size: 19px; font-weight: 700; color: #065f46;
+        }
+        #value-root .c6 { width: 80px; text-align: right; }
+        #value-root .c7 { width: 96px; text-align: right; font-weight: 700; color: var(--w-opt); }
+        #value-root .c8 { width: 96px; text-align: right; color: var(--w-mute); }
+        #value-root .row.hdr .wk { font-size: 18px; }
+        #value-root .row.hdr .c4, #value-root .row.hdr .c7 { color: var(--w-mute); }
+        #value-root .neg { color: var(--w-risk) !important; }
+        #value-root .more { padding: 14px 30px 0; font-family: "JetBrains Mono", monospace; font-size: 20px; color: var(--w-mute); }
+        #value-root .totals {
+          position: absolute; left: 0; bottom: 0; width: 100%; height: 66px; display: flex; align-items: center; gap: 14px; padding: 0 30px;
+          background: #ecfdf5; border-top: 2px solid #a7f3d0; font-size: 23px; font-weight: 700; color: #065f46; white-space: nowrap;
+        }
+        #value-root .totals b { display: block; width: 28px; height: 28px; border-radius: 50%; background: var(--w-opt); position: relative; flex: 0 0 auto; }
+        #value-root .totals svg { position: absolute; left: 6px; top: 6px; width: 16px; height: 16px; }
+
+        /* scene */
+        #value-root .scene-lab { position: absolute; font-family: "JetBrains Mono", monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.14em; color: var(--w-mute); white-space: nowrap; }
+        #value-root .store {
+          position: absolute; left: 1240px; top: 312px; width: 590px; height: 470px; border-radius: 24px; border: 3px solid var(--w-line);
+          background: #fbfbfc;
+        }
+        #value-root svg.layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #value-root svg text { font-family: "JetBrains Mono", monospace; }
+        #value-root .caption {
+          position: absolute; left: 120px; top: 950px; width: 1700px; font-size: 30px; font-weight: 700; color: var(--w-ink);
+        }
+        #value-root .caption span { color: var(--w-opt); }
+      </style>
+
+      <div id="value-root" data-composition-id="value" data-width="1920" data-height="1080">
+        <div class="page" id="va-page">
+          <div class="kick" id="va-kick">07 · END-USER VALUE</div>
+          <div class="ttl" id="va-ttl">What the <em>pricing analyst</em> gets</div>
+          <div class="uline" id="va-ul"></div>
+
+          <div class="sheet" id="va-sheet">
+            <div class="sheet-head"><span id="va-head-l">MARKDOWN PLAN</span><span id="va-head-r"></span></div>
+            <div class="row hdr" id="va-hdr">
+              <div class="c c1">SKU</div><div class="c c2" style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--w-mute)">CATEGORY</div>
+              <div class="c c3">STOCK</div><div class="c c4">ELAST</div>
+              <div class="c wk" id="va-h1">W1</div><div class="c wk" id="va-h2">W2</div><div class="c wk" id="va-h3">W3</div><div class="c wk" id="va-h4">W4</div>
+              <div class="c c6">SOLD*</div><div class="c c7">MARGIN</div><div class="c c8">30% OFF</div>
+            </div>
+            <div id="va-rows"></div>
+            <div class="more" id="va-more"></div>
+            <div class="totals" id="va-totals"></div>
+          </div>
+
+          <div class="scene-lab" id="va-lab" style="left: 1240px; top: 280px">STORE SHELF · EXPECTED SALES</div>
+          <div class="store" id="va-store"></div>
+          <svg class="layer" id="va-svg" viewBox="0 0 1920 1080"></svg>
+
+          <div class="caption" id="va-caption">Every SKU gets its own price path for the next four weeks. <span>More margin, and the shelf still clears.</span></div>
+        </div>
+        <div class="edge" id="va-edge"></div>
+      </div>
+
+      <script>
+        (() => {
+          /* SHEET:BEGIN */ const SHEET = {"event_id":"E1","start_week":"2026-01-26","weeks":4,"target":0.75,"skus":100,"opening_stock":55558,"margin":20673.46,"fixed_30_margin":8674.76,"sell_through":0.9079,"skus_better_than_fixed":76,"rows":[{"sku_id":"SKU0222","category":"pasta and rice","opening_stock":463,"elasticity":-0.672,"depths":[0.0,0.0,0.1,0.1],"planned_sell_through":0.9718,"planned_stock_left":[0.8056,0.6078,0.3176,0.0282],"margin":211.88,"fixed_30_margin":4.62,"animate":0},{"sku_id":"SKU0315","category":"beverages","opening_stock":561,"elasticity":-2.368,"depths":[0.1,0.1,0.1,0.1],"planned_sell_through":0.9792,"planned_stock_left":[0.749,0.5022,0.2595,0.0208],"margin":536.25,"fixed_30_margin":112.2,"animate":1},{"sku_id":"SKU0195","category":"snacks","opening_stock":870,"elasticity":-2.433,"depths":[0.2,0.2,0.3,0.3],"planned_sell_through":0.9881,"planned_stock_left":[0.794,0.5882,0.3018,0.0119],"margin":291.79,"fixed_30_margin":189.98,"animate":2},{"sku_id":"SKU0271","category":"condiments","opening_stock":218,"elasticity":-0.862,"depths":[0.1,0.1,0.1,0.5],"planned_sell_through":0.7544,"planned_stock_left":[0.8357,0.6724,0.5107,0.2456],"margin":-85.98,"fixed_30_margin":-111.42,"animate":3},{"sku_id":"SKU0199","category":"bakery","opening_stock":956,"elasticity":-1.495,"depths":[0.4,0.5,0.5,0.5],"planned_sell_through":0.994,"planned_stock_left":[0.7973,0.5328,0.2691,0.006],"margin":-225.37,"fixed_30_margin":-178.19,"animate":-1},{"sku_id":"SKU0169","category":"household cleaning","opening_stock":1133,"elasticity":-1.542,"depths":[0.1,0.1,0.2,0.2],"planned_sell_through":1.0,"planned_stock_left":[0.7663,0.5358,0.2639,0.0],"margin":2083.15,"fixed_30_margin":1053.69,"animate":-1}]}; /* SHEET:END */
+
+          const CONFIG = {
+            duration: 13.0,
+            colors: ["#6d3cf0", "#d97706", "#1f8fa8", "#dc2b4a"], // one per SKU on the shelf
+            cols: [1380, 1495, 1610, 1725], // shelf column left edges (width 92)
+            colW: 92,
+            units: 10, // boxes per SKU on the shelf = its opening stock
+            shelfY: 556, // shelf board
+            person: { x: 1300, y: 676 },
+            week0: 4.0, weekLen: 1.3,
+          };
+          const NS = "http://www.w3.org/2000/svg";
+          const svg = document.getElementById("va-svg");
+          const el = (tag, attrs, parent) => {
+            const n = document.createElementNS(NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+            (parent || svg).appendChild(n);
+            return n;
+          };
+          const t = (parent, x, y, s, o) => { const n = el("text", Object.assign({ x, y, "font-size": 20, fill: "#111827" }, o || {}), parent); n.textContent = s; return n; };
+          const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+          const fmt = (v) => Math.round(v).toLocaleString("en-US");
+          const pct = (v) => Math.round(v * 100) + "%";
+          const depthBg = (d) => (d <= 0 ? "#f3f4f6" : "rgba(15,159,110," + (0.12 + d * 1.1).toFixed(2) + ")");
+          const depthInk = (d) => (d >= 0.3 ? "#ffffff" : d <= 0 ? "#6b7280" : "#065f46");
+          const tl = gsap.timeline({ paused: true });
+          const D = CONFIG.duration;
+
+          // ---------------- sheet ----------------
+          document.getElementById("va-head-r").textContent = "CLEARANCE " + SHEET.event_id + " · WEEK OF " + SHEET.start_week;
+          const rowsEl = document.getElementById("va-rows");
+          SHEET.rows.forEach((r, i) => {
+            const col = r.animate >= 0 ? CONFIG.colors[r.animate] : "#d1d5db";
+            const wk = r.depths.map((d, w) => '<div class="c wk"><b id="va-d' + i + "-" + w + '" style="background:' + depthBg(d) + ";color:" + depthInk(d) + '">' + pct(d) + "</b></div>").join("");
+            rowsEl.insertAdjacentHTML("beforeend",
+              '<div class="row" id="va-r' + i + '"><div class="tint" id="va-t' + i + '" style="background:' + col + '1f"></div>' +
+              '<div class="c c1"><i style="background:' + col + '"></i>' + r.sku_id + "</div>" +
+              '<div class="c c2">' + r.category + '</div><div class="c c3">' + fmt(r.opening_stock) + '</div><div class="c c4">' + r.elasticity.toFixed(2).replace("-", "−") + "</div>" + wk +
+              '<div class="c c6">' + pct(r.planned_sell_through) + '</div><div class="c c7' + (r.margin < 0 ? " neg" : "") + '">' + fmt(r.margin).replace("-", "−") + "</div>" +
+              '<div class="c c8">' + fmt(r.fixed_30_margin).replace("-", "−") + "</div></div>");
+          });
+          document.getElementById("va-more").textContent = "+ " + (SHEET.skus - SHEET.rows.length) + " more SKUs · * expected share of stock sold";
+          document.getElementById("va-totals").innerHTML =
+            "<b>" + CHECK + "</b>" + SHEET.skus + " SKUs · margin " + fmt(SHEET.margin) + " vs " + fmt(SHEET.fixed_30_margin) + " at 30% off · " +
+            SHEET.skus_better_than_fixed + " SKUs do better";
+
+          // ---------------- scene: analyst, shelf, price tags, weeks ----------------
+          const C = CONFIG, P = C.person;
+          const shelf = el("g", { id: "va-shelf" });
+          el("rect", { x: 1360, y: C.shelfY, width: 450, height: 12, rx: 4, fill: "#9ca3af" }, shelf);
+          el("rect", { x: 1360, y: 336, width: 450, height: 10, rx: 4, fill: "#d1d5db" }, shelf);
+          // person (analyst) with the plan sheet
+          const person = el("g", { id: "va-person" });
+          el("circle", { cx: P.x, cy: P.y - 46, r: 20, fill: "#111827" }, person);
+          el("path", { d: "M" + (P.x - 32) + " " + (P.y + 50) + "v-32a32 28 0 0 1 64 0v32z", fill: "#0f9f6e" }, person);
+          const paper = el("g", { id: "va-paper" }, person);
+          el("rect", { x: P.x + 22, y: P.y - 18, width: 30, height: 38, rx: 4, fill: "#fff", stroke: "#111827", "stroke-width": 2.5 }, paper);
+          [0, 1, 2].forEach((k) => el("line", { x1: P.x + 28, x2: P.x + 46, y1: P.y - 8 + k * 9, y2: P.y - 8 + k * 9, stroke: "#9ca3af", "stroke-width": 2 }, paper));
+          t(person, P.x, P.y + 82, "analyst", { "text-anchor": "middle", fill: "#6b7280" });
+
+          // week ticker
+          const weeks = el("g", { id: "va-weeks" });
+          t(weeks, 1380, 712, "WEEK", { "font-weight": 700, fill: "#6b7280" });
+          const wkCells = [0, 1, 2, 3].map((w) => {
+            const g = el("g", {}, weeks);
+            const r = el("rect", { x: 1450 + w * 92, y: 688, width: 80, height: 36, rx: 8, fill: "#f3f4f6", stroke: "#d1d5db", "stroke-width": 2 }, g);
+            const tx = t(g, 1490 + w * 92, 713, String(w + 1), { "text-anchor": "middle", "font-weight": 700, fill: "#6b7280" });
+            return { r, tx };
+          });
+
+          const anim = SHEET.rows.map((r, i) => ({ r, i })).filter((o) => o.r.animate >= 0).sort((a, b) => a.r.animate - b.r.animate);
+          anim.forEach(({ r, i }, k) => {
+            const col = C.colors[k], x = C.cols[k], cw = C.colW;
+            const g = el("g", { id: "va-prod" + k });
+            t(g, x + cw / 2, 374, r.sku_id, { "text-anchor": "middle", "font-weight": 700, fill: col });
+            // 10 boxes = opening stock, 2 wide x 5 high, top boxes leave first
+            const boxes = [];
+            for (let u = 0; u < C.units; u++) {
+              const bx = x + 6 + (u % 2) * 42, by = C.shelfY - 34 - Math.floor(u / 2) * 34;
+              boxes.push(el("rect", { x: bx, y: by, width: 38, height: 30, rx: 5, fill: col, "fill-opacity": 0.85 }, g));
+            }
+            // price tag on the shelf edge
+            const tag = el("g", {}, g);
+            el("rect", { x: x + 6, y: C.shelfY + 22, width: 80, height: 38, rx: 8, fill: "#fff", stroke: col, "stroke-width": 3 }, tag);
+            // one label per state (full price, then each week's depth); only the current one is visible
+            const states = ["full", ...r.depths.map((d) => (d > 0 ? "−" + pct(d) : "full"))];
+            const tagTxt = states.map((s0, j) => t(tag, x + cw / 2, C.shelfY + 48, s0, { "text-anchor": "middle", "font-weight": 700, fill: col, opacity: j === 0 ? 1 : 0 }));
+            const sold = t(g, x + cw / 2, C.shelfY + 94, pct(r.planned_sell_through) + " sold", { "text-anchor": "middle", "font-weight": 700, fill: "#0f9f6e", opacity: 0, id: "va-sold" + k });
+            const ok = el("g", { opacity: 0 }, g);
+            el("circle", { cx: x + cw - 4, cy: C.shelfY + 22, r: 13, fill: "#0f9f6e" }, ok);
+            el("path", { d: "M" + (x + cw - 10) + " " + (C.shelfY + 22.5) + "l4 4 8-8.5", fill: "none", stroke: "#fff", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, ok);
+
+            tl.fromTo(g, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.4 + k * 0.12);
+            // each week: tag shows that week's depth, units leave down to the expected stock left
+            let left = C.units;
+            r.depths.forEach((d, w) => {
+              const at = C.week0 + w * C.weekLen;
+              tl.fromTo(tagTxt[w], { attr: { opacity: 1 } }, { attr: { opacity: 0 }, duration: 0.1, immediateRender: false }, at);
+              tl.fromTo(tagTxt[w + 1], { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.1, immediateRender: false }, at + 0.05);
+              tl.fromTo(tag, { scale: 1 }, { scale: 1.12, svgOrigin: x + cw / 2 + " " + (C.shelfY + 41), duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, at);
+              const target = Math.round(C.units * r.planned_stock_left[w]);
+              for (let u = left - 1; u >= target; u--) {
+                tl.to(boxes[u], { attr: { "fill-opacity": 0 }, y: -14, duration: 0.3, ease: "power2.in" }, at + 0.25 + (left - 1 - u) * 0.07);
+              }
+              left = Math.min(left, target);
+            });
+            const END = C.week0 + 4 * C.weekLen;
+            tl.fromTo(sold, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.4 }, END + k * 0.12);
+            if (r.planned_sell_through >= SHEET.target) tl.fromTo(ok, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.3 }, END + 0.2 + k * 0.12);
+          });
+          // the analyst sets the tags each week; sheet column for that week lights up
+          [0, 1, 2, 3].forEach((w) => {
+            const at = C.week0 + w * C.weekLen;
+            tl.to(wkCells[w].r, { attr: { fill: "#0f9f6e", stroke: "#0f9f6e" }, duration: 0.25 }, at);
+            tl.to(wkCells[w].tx, { attr: { fill: "#ffffff" }, duration: 0.25 }, at);
+            tl.fromTo("#va-h" + (w + 1), { color: "#6b7280" }, { color: "#0f9f6e", duration: 0.25 }, at);
+            if (w > 0) tl.to("#va-h" + w, { color: "#6b7280", duration: 0.25 }, at);
+            SHEET.rows.forEach((_, i) => tl.fromTo("#va-d" + i + "-" + w, { scale: 1 }, { scale: 1.15, duration: 0.18, yoyo: true, repeat: 1 }, at + i * 0.03));
+            tl.fromTo("#va-paper", { rotation: 0 }, { rotation: -12, svgOrigin: P.x + 37 + " " + (P.y + 1), duration: 0.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, at - 0.1);
+          });
+          anim.forEach(({ i }, k) => {
+            tl.to("#va-t" + i, { opacity: 1, duration: 0.3 }, 2.2 + k * 0.35);
+            tl.to("#va-t" + i, { opacity: 0.55, duration: 0.4 }, 2.6 + k * 0.35);
+          });
+
+          // ---------------- choreography ----------------
+          tl.fromTo("#va-page", { clipPath: "inset(0px 100% 0px 0px)" }, { clipPath: "inset(0px 0% 0px 0px)", duration: 0.7, ease: "power3.inOut" }, 0);
+          tl.fromTo("#va-edge", { x: 0, opacity: 1 }, { x: 1920, duration: 0.7, ease: "power3.inOut" }, 0);
+          tl.to("#va-edge", { opacity: 0, duration: 0.1 }, 0.7);
+          tl.fromTo("#va-kick", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.5);
+          tl.fromTo("#va-ttl", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.55);
+          tl.fromTo("#va-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.9);
+          tl.fromTo("#va-sheet", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.8);
+          SHEET.rows.forEach((_, i) => tl.fromTo("#va-r" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }, 1.3 + i * 0.3));
+          tl.fromTo("#va-more", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.3 + SHEET.rows.length * 0.3);
+          tl.fromTo("#va-totals", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 3.4);
+          tl.fromTo(["#va-store", "#va-lab", "#va-shelf", "#va-weeks"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.9);
+          tl.fromTo("#va-person", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 1.1);
+          tl.fromTo("#va-caption", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 9.8);
+          // wipe out (white -> dark), revealing the next dark scene underneath
+          tl.to("#va-page", { clipPath: "inset(0px 0px 0px 100%)", duration: 0.7, ease: "power3.inOut" }, D - 0.7);
+          tl.fromTo("#va-edge", { x: 0, opacity: 0 }, { x: 1920, opacity: 1, duration: 0.7, ease: "power3.inOut", immediateRender: false }, D - 0.7);
+          window.__timelines["value"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

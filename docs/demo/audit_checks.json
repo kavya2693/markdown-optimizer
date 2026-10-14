@@ -1,0 +1,542 @@
+{
+ "generated": "2026-10-14 14:18",
+ "commit": "53fed34eb58576187392a2d38677502d4ffbe523",
+ "checks": [
+  {
+   "id": "F-01",
+   "shown": "3 industry chips",
+   "type": "general-knowledge",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Context statement, not a repo output."
+  },
+  {
+   "id": "F-02",
+   "shown": "4 problem cards",
+   "type": "general-knowledge",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-03",
+   "shown": "400 SKUs / seed 7 \u00b7 400 SKUs",
+   "type": "direct",
+   "computed": "400",
+   "expect": "400",
+   "status": "pass"
+  },
+  {
+   "id": "F-04",
+   "shown": "12 categories",
+   "type": "direct",
+   "computed": "12",
+   "expect": "12",
+   "status": "pass"
+  },
+  {
+   "id": "F-05",
+   "shown": "3 events",
+   "type": "direct",
+   "computed": "3",
+   "expect": "3",
+   "status": "pass"
+  },
+  {
+   "id": "F-06",
+   "shown": "\u00d7 100 slow movers",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-07",
+   "shown": "156 weeks",
+   "type": "direct",
+   "computed": "156",
+   "expect": "156",
+   "status": "pass"
+  },
+  {
+   "id": "F-08",
+   "shown": "61,799 SKU-weeks / 61,799 rows",
+   "type": "direct",
+   "computed": "61,799",
+   "expect": "61,799",
+   "status": "pass"
+  },
+  {
+   "id": "F-09",
+   "shown": "0\u201360% off",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-10",
+   "shown": "4-week events",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-11",
+   "shown": "leftovers go for 30% of cost",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-12",
+   "shown": "slow movers",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-13",
+   "shown": "3 years, every price change",
+   "type": "derived",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-14",
+   "shown": "score all 210 / 210 of them / 210 paths/SKU-event / scored 210 / 210",
+   "type": "derived",
+   "computed": "210",
+   "expect": "210",
+   "status": "pass"
+  },
+  {
+   "id": "F-15",
+   "shown": "\u2713 more margin \u2713 stock clears \u2713 checked on truth",
+   "type": "derived",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-16",
+   "shown": "CLEAR 75% / clears 75% / \u2265 75% sold? / target 75%",
+   "type": "direct",
+   "computed": "75",
+   "expect": "75",
+   "status": "pass"
+  },
+  {
+   "id": "F-17",
+   "shown": "SKU0222 0% 0% 10% 10% \u00b7 5 \u2192 212",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-18",
+   "shown": "SKU0138 30% 40% 40% 40% \u00b7 303 \u2192 346",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-19",
+   "shown": "56,628",
+   "type": "direct",
+   "computed": "56,628",
+   "expect": "56,628",
+   "status": "pass"
+  },
+  {
+   "id": "F-20",
+   "shown": "18,877",
+   "type": "direct",
+   "computed": "18,877",
+   "expect": "18,877",
+   "status": "pass"
+  },
+  {
+   "id": "F-21",
+   "shown": "71% of them beat the rule",
+   "type": "direct",
+   "computed": "71",
+   "expect": "71",
+   "status": "pass"
+  },
+  {
+   "id": "F-22",
+   "shown": "the price never goes back up / never back up",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-23",
+   "shown": "thin products lean on their category / steadied by its category / EB shrinkage toward category",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-24",
+   "shown": "generate_data.py, sales.csv, events.csv, features.py prepare(), Poisson GLM, EB shrinkage, fit_controls(), simulate.py planner's curve, optimize.py ladder search, markdown_plan.csv, data/truth/, lift.py, simulate.py scorer, results.json, report.md, cli.py",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-25",
+   "shown": "no \u2192 else: max sell-through",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-26",
+   "shown": "seed 7 / seed 11",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-27",
+   "shown": "6,531 past promos",
+   "type": "direct",
+   "computed": "6,531",
+   "expect": "6,531",
+   "status": "pass"
+  },
+  {
+   "id": "F-28",
+   "shown": "400 paired draws \u00d7 300 SKU-events",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-29",
+   "shown": "+ 7 CSVs",
+   "type": "direct",
+   "computed": "7",
+   "expect": "7",
+   "status": "pass"
+  },
+  {
+   "id": "F-30",
+   "shown": "make run \u2248 10 s / ~10 s",
+   "type": "illustrative",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Single wall-clock measurement on the author's laptop (A-14); the repo does not record a run time."
+  },
+  {
+   "id": "F-31",
+   "shown": "no network",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-32",
+   "shown": "data/truth/ \u00b7 eval code only \u00b7 sealed",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-33",
+   "shown": "competitor held flat",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-34",
+   "shown": "IRLS \u00b7 one per SKU \u00b7 bulk-order refit \u00b7 4 estimators",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-35",
+   "shown": "make sweep: seeds 8-11",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-36",
+   "shown": "0.385",
+   "type": "direct",
+   "computed": "0.385",
+   "expect": "0.385",
+   "status": "pass"
+  },
+  {
+   "id": "F-37",
+   "shown": "0.279",
+   "type": "direct",
+   "computed": "0.279",
+   "expect": "0.279",
+   "status": "pass"
+  },
+  {
+   "id": "F-38",
+   "shown": "Fewest promotions: 0.497",
+   "type": "direct",
+   "computed": "0.497",
+   "expect": "0.497",
+   "status": "pass"
+  },
+  {
+   "id": "F-39",
+   "shown": "\u2192 0.321",
+   "type": "direct",
+   "computed": "0.321",
+   "expect": "0.321",
+   "status": "pass"
+  },
+  {
+   "id": "F-40",
+   "shown": "\u221228% error / \u221228% / cut elasticity error 28%",
+   "type": "derived",
+   "computed": "-28",
+   "expect": "-28",
+   "status": "pass"
+  },
+  {
+   "id": "F-41",
+   "shown": "400 points moving from 'alone' to 'pooled'",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-42",
+   "shown": "9 bar values",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-43",
+   "shown": "total 18,877",
+   "type": "derived",
+   "computed": "18,877",
+   "expect": "18,877",
+   "status": "pass"
+  },
+  {
+   "id": "F-44",
+   "shown": "\u2192 56,628",
+   "type": "derived",
+   "computed": "56,628",
+   "expect": "56,628",
+   "status": "pass"
+  },
+  {
+   "id": "F-45",
+   "shown": "6 sheet rows",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-46",
+   "shown": "margin 20,673",
+   "type": "direct",
+   "computed": "20,673",
+   "expect": "20,673",
+   "status": "pass"
+  },
+  {
+   "id": "F-47",
+   "shown": "vs 8,675 at 30% off",
+   "type": "direct",
+   "computed": "8,675",
+   "expect": "8,675",
+   "status": "pass"
+  },
+  {
+   "id": "F-48",
+   "shown": "76 SKUs do better",
+   "type": "derived",
+   "computed": "76",
+   "expect": "76",
+   "status": "pass"
+  },
+  {
+   "id": "F-49",
+   "shown": "100 SKUs \u00b7 + 94 more SKUs",
+   "type": "direct",
+   "computed": "100",
+   "expect": "100",
+   "status": "pass"
+  },
+  {
+   "id": "F-50",
+   "shown": "\u22120.67",
+   "type": "direct",
+   "computed": "-0.67",
+   "expect": "-0.67",
+   "status": "pass"
+  },
+  {
+   "id": "F-51",
+   "shown": "75% / 75% sold",
+   "type": "direct",
+   "computed": "75",
+   "expect": "75",
+   "status": "pass"
+  },
+  {
+   "id": "F-52",
+   "shown": "shelf animation",
+   "type": "illustrative",
+   "status": "manual",
+   "computed": "-",
+   "reason": "Drawing; the proportions come from the planner's expected demand, not from realised sales."
+  },
+  {
+   "id": "F-53",
+   "shown": "3.0\u00d7",
+   "type": "derived",
+   "computed": "3.0",
+   "expect": "3.0",
+   "status": "pass"
+  },
+  {
+   "id": "F-54",
+   "shown": "87%",
+   "type": "direct",
+   "computed": "87",
+   "expect": "87",
+   "status": "pass"
+  },
+  {
+   "id": "F-55",
+   "shown": "upper bound 62,373",
+   "type": "direct",
+   "computed": "62,373",
+   "expect": "62,373",
+   "status": "pass"
+  },
+  {
+   "id": "F-56",
+   "shown": "92.0%",
+   "type": "direct",
+   "computed": "92.0",
+   "expect": "92.0",
+   "status": "pass"
+  },
+  {
+   "id": "F-57",
+   "shown": "30% rule sells 93.0%",
+   "type": "direct",
+   "computed": "93.0",
+   "expect": "93.0",
+   "status": "pass"
+  },
+  {
+   "id": "F-58",
+   "shown": "+23,884",
+   "type": "direct",
+   "computed": "23,884",
+   "expect": "23,884",
+   "status": "pass"
+  },
+  {
+   "id": "F-59",
+   "shown": "20%, picked with hindsight",
+   "type": "direct",
+   "computed": "20",
+   "expect": "20",
+   "status": "pass"
+  },
+  {
+   "id": "F-60",
+   "shown": "+36,705",
+   "type": "direct",
+   "computed": "36,705",
+   "expect": "36,705",
+   "status": "pass"
+  },
+  {
+   "id": "F-61",
+   "shown": "+37,750",
+   "type": "direct",
+   "computed": "37,750",
+   "expect": "37,750",
+   "status": "pass"
+  },
+  {
+   "id": "F-62",
+   "shown": "+43,496",
+   "type": "direct",
+   "computed": "43,496",
+   "expect": "43,496",
+   "status": "pass"
+  },
+  {
+   "id": "F-63",
+   "shown": "1,046",
+   "type": "direct",
+   "computed": "1,046",
+   "expect": "1,046",
+   "status": "pass"
+  },
+  {
+   "id": "F-64",
+   "shown": "\u00b1 1,042",
+   "type": "direct",
+   "computed": "1,042",
+   "expect": "1,042",
+   "status": "pass"
+  },
+  {
+   "id": "F-65",
+   "shown": "The gain comes from deciding per SKU with a clearance floor.",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-66",
+   "shown": "MIT",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  },
+  {
+   "id": "F-67",
+   "shown": "Poisson GLM \u00b7 empirical Bayes \u00b7 exhaustive ladder search \u00b7 pandas",
+   "type": "direct",
+   "computed": "true",
+   "expect": "true",
+   "status": "pass"
+  }
+ ]
+}

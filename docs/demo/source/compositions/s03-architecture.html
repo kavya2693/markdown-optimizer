@@ -1,0 +1,295 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #arch-root { position: absolute; inset: 0; }
+        #arch-root .diagram { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 960px 600px; }
+        #arch-root svg.wires { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+        #arch-root svg text { font-family: Inter, "Helvetica Neue", sans-serif; }
+        #arch-root svg .mono { font-family: "JetBrains Mono", monospace; }
+      </style>
+
+      <div id="arch-root" data-composition-id="arch" data-width="1920" data-height="1080">
+        <div class="scene" id="arch-in">
+          <div class="eyebrow" data-layout-allow-overlap id="arch-eyebrow">05 · Architecture</div>
+          <div class="scene-title" data-layout-allow-overlap id="arch-title">History in, a markdown plan out, graded on a sealed truth.</div>
+          <div class="diagram" id="arch-diagram">
+            <svg class="wires" viewBox="0 0 1920 1080" id="arch-svg"></svg>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          /* Every node maps to a real file/function in src/markdown_optimizer/ (see audit/facts.yaml F-20..F-34).
+             Layers left to right: sources -> features -> models -> decision -> outputs; evaluation band below. */
+          const D = 17.0;
+          const NS = "http://www.w3.org/2000/svg";
+          const COL = { data: "#7fa8ff", model: "#b9a2ff", opt: "#3fd8a8", eval: "#f2c46d", risk: "#ff8a73", ink: "#b2bfcc" };
+          const FILL = { data: "#0f1a2b", model: "#151530", opt: "#0d2228", eval: "#1e1b14", risk: "#24141a", ink: "#0f1a26" };
+          const svg = document.getElementById("arch-svg");
+          const el = (tag, attrs, parent) => {
+            const n = document.createElementNS(NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+            (parent || svg).appendChild(n);
+            return n;
+          };
+          const txt = (parent, x, y, s, o) => {
+            const t = el("text", Object.assign({ x, y, fill: "#eef2f6", "font-size": 24 }, o || {}), parent);
+            t.textContent = s;
+            return t;
+          };
+          const tag = (g, x, y, s, c) => {
+            const w = s.length * 12 + 18;
+            el("rect", { x, y: y - 14, width: w, height: 28, rx: 6, fill: "#0a1119", stroke: c, "stroke-width": 2 }, g);
+            txt(g, x + 9, y + 7, s, { class: "mono", "font-size": 20, fill: c });
+          };
+
+          // ---------------- layers ----------------
+          const layerG = el("g", { id: "arch-layers" });
+          const band = el("g", { id: "arch-band" }, layerG);
+          el("rect", { x: 86, y: 772, width: 1798, height: 190, rx: 18, fill: "rgba(242,196,109,0.04)", stroke: "rgba(242,196,109,0.45)", "stroke-width": 2, "stroke-dasharray": "10 8" }, band);
+          tag(band, 108, 772, "EVALUATION · OFFLINE, ON SEALED TRUTH", COL.eval);
+          const heads = [
+            { id: "h1", x: 100, s: "SOURCES", c: COL.data },
+            { id: "h2", x: 440, s: "FEATURES", c: COL.data },
+            { id: "h3", x: 770, s: "MODELS", c: COL.model },
+            { id: "h4", x: 1170, s: "DECISION", c: COL.opt },
+            { id: "h5", x: 1590, s: "OUTPUTS · cli.py", c: COL.opt },
+          ];
+          heads.forEach((h) => {
+            const g = el("g", { id: "arch-" + h.id }, layerG);
+            txt(g, h.x, 208, h.s, { class: "mono", "font-size": 20, "font-weight": 700, fill: h.c, "letter-spacing": "2" });
+          });
+
+          // group frames (one per module that owns several boxes)
+          const frames = [
+            { id: "fr-el", x: 770, y: 262, w: 310, h: 440, c: COL.model, t: "elasticity.py" },
+            { id: "fr-op", x: 1170, y: 262, w: 320, h: 440, c: COL.opt, t: "optimize.py", right: true },
+          ];
+          frames.forEach((f) => {
+            const g = el("g", { id: "arch-" + f.id });
+            el("rect", { x: f.x, y: f.y, width: f.w, height: f.h, rx: 18, fill: "none", stroke: f.c, "stroke-opacity": 0.4, "stroke-width": 2, "stroke-dasharray": "8 7" }, g);
+            f.g = g;
+          });
+
+          // ---------------- nodes ----------------
+          // kind: box | cyl (data store) | doc (file written) | diamond (decision) | person (human, outside the repo)
+          const N = {
+            gen: { kind: "box", x: 100, y: 262, w: 250, h: 82, L: "data", tag: "generate_data.py", t: "Seeded generator", s: ["seed 7 · 400 SKUs"] },
+            sales: { kind: "cyl", x: 100, y: 380, w: 250, h: 112, L: "data", t: "sales.csv", s: ["61,799 SKU-weeks"] },
+            events: { kind: "cyl", x: 100, y: 540, w: 250, h: 112, L: "data", t: "events.csv", s: ["300 SKU-events"] },
+            prep: { kind: "box", x: 440, y: 330, w: 240, h: 170, L: "data", tag: "features.py", t: "prepare()", s: ["comp. gaps filled", "post-promo flag", "Fourier season"] },
+            glm: { kind: "box", x: 790, y: 290, w: 270, h: 104, L: "model", t: "Poisson GLM", s: ["IRLS · one per SKU", "bulk-order refit"] },
+            shrink: { kind: "box", x: 790, y: 436, w: 270, h: 104, L: "model", t: "EB shrinkage", s: ["DerSimonian-Laird", "toward category"] },
+            ctrl: { kind: "box", x: 790, y: 582, w: 270, h: 104, L: "model", t: "fit_controls()", s: ["β, γ held fixed", "refit season, promo"] },
+            curve: { kind: "box", x: 1190, y: 292, w: 280, h: 80, L: "opt", tag: "simulate.py", tagLeft: true, t: "Planner's curve", s: ["competitor held flat"] },
+            ladder: { kind: "box", x: 1190, y: 398, w: 280, h: 162, L: "opt", hero: true, t: "Ladder search", s: ["210 paths/SKU-event", "0-60%, never back up", "exhaustive, no solver"] },
+            dec: { kind: "diamond", cx: 1330, cy: 632, hw: 126, hh: 48, L: "opt", t: "≥ 75% sold?" },
+            fall: { kind: "box", x: 1190, y: 712, w: 280, h: 46, L: "risk", dash: true, t: "", s: [], line: "else: max sell-through" },
+            plan: { kind: "doc", x: 1590, y: 300, w: 250, h: 100, L: "opt", t: "markdown_plan.csv", s: ["4 weekly depths"] },
+            human: { kind: "person", x: 1650, y: 450, w: 190, h: 120, L: "ink", t: "Pricing analyst", s: ["outside repo"] },
+            truth: { kind: "cyl", x: 100, y: 800, w: 250, h: 140, L: "data", lock: true, t: "data/truth/", s: ["true β, γ, prices", "eval code only"] },
+            lift: { kind: "box", x: 440, y: 800, w: 240, h: 100, L: "eval", tag: "lift.py", t: "Promo lift", s: ["6,531 past promos"] },
+            sim: { kind: "box", x: 770, y: 800, w: 720, h: 140, L: "eval", tag: "simulate.py", t: "Score every plan on the true curve", s: ["400 paired draws × 300 SKU-events · seed 11", "no markdown · 30% rule · 4 estimators · best blanket · oracle"] },
+            res: { kind: "doc", x: 1650, y: 800, w: 190, h: 120, L: "eval", t: "results.json", s: ["report.md", "+ 7 CSVs"] },
+          };
+
+          Object.entries(N).forEach(([id, n]) => {
+            const g = el("g", { id: "n-" + id });
+            const c = COL[n.L], f = FILL[n.L];
+            n.g = g;
+            if (n.kind === "box") {
+              const r = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, fill: f, stroke: c, "stroke-opacity": n.hero ? 1 : 0.7, "stroke-width": n.hero ? 3 : 2 }, g);
+              if (n.dash) r.setAttribute("stroke-dasharray", "8 6");
+              n.shape = r;
+              if (n.line) { txt(g, n.x + n.w / 2, n.y + 30, n.line, { class: "mono", "font-size": 20, fill: c, "text-anchor": "middle" }); }
+              else {
+                txt(g, n.x + 16, n.y + 38, n.t, { "font-size": n.hero ? 28 : 25, "font-weight": 700, class: n.t.endsWith(")") ? "mono" : "" });
+                n.s.forEach((s, k) => txt(g, n.x + 16, n.y + 68 + k * 26, s, { class: n.w > 600 && k === 1 ? "" : "mono", "font-size": 20, fill: "#b2bfcc" }));
+              }
+              if (n.tag) tag(g, n.tagLeft ? n.x + 14 : n.x + n.w - n.tag.length * 12 - 30, n.y, n.tag, c);
+            } else if (n.kind === "cyl") {
+              const e = 14, x = n.x, y = n.y, w = n.w, h = n.h;
+              const d = "M" + x + " " + (y + e) + " a" + w / 2 + " " + e + " 0 0 0 " + w + " 0 v" + (h - 2 * e) + " a" + w / 2 + " " + e + " 0 0 1 " + -w + " 0 z";
+              n.shape = el("path", { d, fill: f, stroke: c, "stroke-opacity": 0.75, "stroke-width": 2 }, g);
+              if (n.lock) n.shape.setAttribute("stroke-dasharray", "8 6");
+              el("ellipse", { cx: x + w / 2, cy: y + e, rx: w / 2, ry: e, fill: "#16263a", stroke: c, "stroke-opacity": 0.75, "stroke-width": 2 }, g);
+              txt(g, x + 16, y + 58, n.t, { class: "mono", "font-size": 24, "font-weight": 700 });
+              n.s.forEach((s, k) => txt(g, x + 16, y + 86 + k * 26, s, { class: "mono", "font-size": 20, fill: k === 1 && n.lock ? COL.eval : "#b2bfcc" }));
+              if (n.lock) {
+                const lx = x + w - 44, ly = y + 38;
+                el("rect", { x: lx, y: ly + 10, width: 24, height: 18, rx: 3, fill: COL.eval }, g);
+                el("path", { d: "M" + (lx + 5) + " " + (ly + 10) + "v-5a7 7 0 0 1 14 0v5", fill: "none", stroke: COL.eval, "stroke-width": 3 }, g);
+              }
+            } else if (n.kind === "doc") {
+              const x = n.x, y = n.y, w = n.w, h = n.h, k = 22;
+              n.shape = el("path", { d: "M" + x + " " + y + "h" + (w - k) + "l" + k + " " + k + "v" + (h - k) + "h" + -w + "z", fill: f, stroke: c, "stroke-opacity": 0.8, "stroke-width": 2 }, g);
+              el("path", { d: "M" + (x + w - k) + " " + y + "v" + k + "h" + k, fill: "none", stroke: c, "stroke-opacity": 0.8, "stroke-width": 2 }, g);
+              txt(g, x + 14, y + 40, n.t, { class: "mono", "font-size": 21, "font-weight": 700 });
+              n.s.forEach((s, j) => txt(g, x + 14, y + 68 + j * 26, s, { class: "mono", "font-size": 20, fill: "#b2bfcc" }));
+            } else if (n.kind === "diamond") {
+              const { cx, cy, hw, hh } = n;
+              n.shape = el("path", { d: "M" + cx + " " + (cy - hh) + "L" + (cx + hw) + " " + cy + "L" + cx + " " + (cy + hh) + "L" + (cx - hw) + " " + cy + "z", fill: FILL.opt, stroke: c, "stroke-width": 2.5 }, g);
+              txt(g, cx, cy + 8, n.t, { class: "mono", "font-size": 22, "font-weight": 700, "text-anchor": "middle", fill: COL.opt });
+            } else if (n.kind === "person") {
+              n.shape = el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, fill: "none", stroke: "#8494a6", "stroke-width": 2, "stroke-dasharray": "6 6" }, g);
+              const px = n.x + n.w / 2, py = n.y + 34;
+              el("circle", { cx: px, cy: py - 8, r: 11, fill: "#b2bfcc" }, g);
+              el("path", { d: "M" + (px - 18) + " " + (py + 22) + "v-8a18 14 0 0 1 36 0v8z", fill: "#b2bfcc" }, g);
+              txt(g, px, n.y + 88, n.t, { "font-size": 22, "font-weight": 700, "text-anchor": "middle" });
+              txt(g, px, n.y + 111, n.s[0], { class: "mono", "font-size": 20, "text-anchor": "middle", fill: "#8494a6" });
+            }
+          });
+
+          // ---------------- wires ----------------
+          // style: solid = batch data flow · dashed = sealed truth (eval only) / human hand-off · dotted = seed-sweep loop
+          // label: [text lines], x, y (first baseline), anchor
+          const W = [
+            { id: "gs", pts: [[225, 344], [225, 380]], c: "data", step: 0 },
+            { id: "ge", pts: [[100, 303], [80, 303], [80, 596], [100, 596]], c: "data", step: 0 },
+            { id: "gt", pts: [[80, 596], [80, 870], [100, 870]], c: "data", step: 0, noHead: false },
+            { id: "sp", pts: [[350, 436], [440, 436]], c: "data", step: 1, crit: true, lab: [["61,799", "rows"], 395, 396, "middle"] },
+            { id: "pg", pts: [[680, 360], [790, 360]], c: "data", step: 2, crit: true, lab: [["design", "matrix"], 735, 318, "middle"] },
+            { id: "gk", pts: [[925, 394], [925, 436]], c: "model", step: 3, crit: true, lab: [["β̂ ± se"], 937, 422, "start"] },
+            { id: "kc", pts: [[925, 540], [925, 582]], c: "model", step: 4, crit: true, lab: [["pooled β, γ"], 937, 568, "start"] },
+            { id: "cc", pts: [[1060, 634], [1120, 634], [1120, 332], [1190, 332]], c: "model", step: 5, crit: true, lab: [["coefs"], 1155, 318, "middle"] },
+            { id: "el", pts: [[350, 596], [380, 596], [380, 708], [1150, 708], [1150, 500], [1190, 500]], c: "data", step: 5, lab: [["stock · cost · salvage"], 450, 694, "start"] },
+            { id: "cl", pts: [[1330, 372], [1330, 398]], c: "opt", step: 6, crit: true, lab: [["E[units]"], 1342, 392, "start"] },
+            { id: "ld", pts: [[1330, 560], [1330, 584]], c: "opt", step: 7, crit: true },
+            { id: "dy", pts: [[1456, 632], [1530, 632], [1530, 350], [1590, 350]], c: "opt", step: 8, crit: true, lab: [["yes"], 1493, 620, "middle"] },
+            { id: "df", pts: [[1330, 680], [1330, 712]], c: "risk", step: 8, dash: "6 5", lab: [["no"], 1342, 702, "start"] },
+            { id: "fm", pts: [[1470, 735], [1530, 735], [1530, 640]], c: "risk", step: 8, dash: "6 5", noHead: true },
+            { id: "ph", pts: [[1745, 400], [1745, 450]], c: "ink", step: 9, dash: "6 6", lab: [["review"], 1757, 432, "start"] },
+            { id: "ps", pts: [[1615, 400], [1615, 830], [1490, 830]], c: "opt", step: 9, lab: [["all plans"], 1625, 660, "start"] },
+            { id: "tl", pts: [[350, 840], [440, 840]], c: "eval", step: 9, dash: "10 7" },
+            { id: "ts", pts: [[350, 920], [770, 920]], c: "eval", step: 9, dash: "10 7", lab: [["true curve + real prices"], 450, 948, "start"] },
+            { id: "cf", pts: [[810, 686], [810, 750], [610, 750], [610, 800]], c: "model", step: 9, lab: [["model baseline"], 626, 740, "start"] },
+            { id: "sr", pts: [[1490, 885], [1650, 885]], c: "eval", step: 10, lab: [["margin · CI"], 1570, 870, "middle"] },
+            { id: "sw", pts: [[1840, 860], [1872, 860], [1872, 236], [225, 236], [225, 262]], c: "ink", step: 11, dash: "2 7", lab: [["make sweep: seeds 8-11"], 1100, 243, "middle"], bg: true },
+          ];
+          // arrowheads per colour
+          const defs = el("defs", {});
+          Object.entries(COL).forEach(([k, c]) => {
+            const m = el("marker", { id: "ah-" + k, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 5, markerHeight: 5, orient: "auto-start-reverse" }, defs);
+            el("path", { d: "M0 0L10 5L0 10z", fill: c }, m);
+          });
+          const wireG = el("g", { id: "arch-wires" });
+          const lenOf = (pts) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
+          W.forEach((w) => {
+            w.len = lenOf(w.pts);
+            const g = el("g", { id: "w-" + w.id }, wireG);
+            const p = el("path", { d: "M" + w.pts.map((q) => q.join(" ")).join(" L"), fill: "none", stroke: COL[w.c], "stroke-width": 3.5, "stroke-linejoin": "round", "stroke-opacity": 0.85 }, g);
+            if (!w.noHead) p.setAttribute("marker-end", "url(#ah-" + w.c + ")");
+            if (w.dash) p.setAttribute("stroke-dasharray", w.dash);
+            if (w.c === "ink" && w.id === "sw") p.setAttribute("stroke-linecap", "round");
+            w.path = p;
+            w.g = g;
+            if (w.lab) {
+              const [lines, lx, ly, anchor] = w.lab;
+              const lg = el("g", { id: "wl-" + w.id }, svg);
+              if (w.bg) {
+                const tw = Math.max(...lines.map((s) => s.length)) * 12 + 20;
+                el("rect", { x: anchor === "middle" ? lx - tw / 2 : lx - 10, y: ly - 20, width: tw, height: 28, rx: 6, fill: "#0a1119" }, lg);
+              }
+              lines.forEach((s, k) => txt(lg, lx, ly + k * 23, s, { class: "mono", "font-size": 20, fill: COL[w.c], "text-anchor": anchor }));
+              w.lg = lg;
+            }
+          });
+          frames.forEach((f) => tag(f.g, f.right ? f.x + f.w - f.t.length * 12 - 34 : f.x + 16, f.y, f.t, f.c));
+
+          // annotations: non-functional facts the repo supports, and the critical-path pill
+          const nfr = el("g", { id: "arch-nfr" });
+          tag(nfr, 1330, 772, "batch CLI · make run ≈ 10 s · no network", "#b2bfcc");
+          const pill = el("g", { id: "arch-crit", opacity: 0 });
+          el("rect", { x: 664, y: 757, width: 592, height: 32, rx: 16, fill: "#eef2f6" }, pill);
+          txt(pill, 960, 780, "critical path: sales.csv → markdown_plan.csv", { class: "mono", "font-size": 20, "font-weight": 700, fill: "#0a1119", "text-anchor": "middle" });
+          // stacking: layers < frames < wires < nodes < wire labels < annotations (packets and trace go on top)
+          [defs, layerG, ...frames.map((f) => f.g), wireG, ...Object.values(N).map((n) => n.g), ...W.filter((w) => w.lg).map((w) => w.lg), nfr, pill]
+            .forEach((n) => svg.appendChild(n));
+          // counter inside the hero box
+          const counter = txt(N.ladder.g, 1206, 548, "scored 0 / 210", { class: "mono", "font-size": 20, "font-weight": 700, fill: COL.opt, id: "arch-count" });
+          counter.setAttribute("opacity", "0");
+
+          // ---------------- timeline ----------------
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#arch-in", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+          tl.fromTo("#arch-eyebrow", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
+          tl.fromTo("#arch-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+          tl.fromTo("#arch-diagram", { scale: 0.985 }, { scale: 1, duration: D, ease: "sine.out" }, 0);
+
+          const show = (sel, at, dy) => tl.fromTo(sel, { opacity: 0, y: dy || 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at);
+          const draw = (w, at) => {
+            tl.fromTo(w.path, { attr: { "stroke-dashoffset": w.dash ? 0 : w.len, "stroke-dasharray": w.dash || w.len + " " + w.len } },
+              { attr: { "stroke-dashoffset": 0 }, duration: Math.max(0.3, Math.min(0.9, w.len / 1200)), ease: "power2.inOut" }, at);
+            tl.fromTo(w.g, { opacity: 0 }, { opacity: 1, duration: 0.25 }, at);
+            if (w.lg) tl.fromTo(w.lg, { opacity: 0 }, { opacity: 1, duration: 0.35 }, at + 0.3);
+          };
+          const wire = (id) => W.find((w) => w.id === id);
+          // build, layer by layer
+          const LAYERS = [
+            { at: 0.7, head: "#arch-h1", nodes: ["gen", "sales", "events"], wires: ["gs", "ge"] },
+            { at: 1.5, head: "#arch-h2", nodes: ["prep"], wires: ["sp"] },
+            { at: 2.3, head: "#arch-h3", frames: ["#arch-fr-el"], nodes: ["glm", "shrink", "ctrl"], wires: ["pg", "gk", "kc"] },
+            { at: 3.3, head: "#arch-h4", frames: ["#arch-fr-op"], nodes: ["curve", "ladder", "dec", "fall"], wires: ["cc", "el", "cl", "ld", "df", "fm"] },
+            { at: 4.3, head: "#arch-h5", nodes: ["plan", "human"], wires: ["dy", "ph"] },
+            { at: 5.1, head: "#arch-band", nodes: ["truth", "lift", "sim", "res"], wires: ["gt", "tl", "ts", "cf", "ps", "sr"] },
+          ];
+          LAYERS.forEach((L) => {
+            tl.fromTo(L.head, { opacity: 0 }, { opacity: 1, duration: 0.4 }, L.at);
+            (L.frames || []).forEach((f) => tl.fromTo(f, { opacity: 0 }, { opacity: 1, duration: 0.4 }, L.at));
+            L.nodes.forEach((n, i) => show("#n-" + n, L.at + 0.1 + i * 0.12));
+            L.wires.forEach((w, i) => draw(wire(w), L.at + 0.35 + i * 0.08));
+          });
+          draw(wire("sw"), 6.0);
+          tl.fromTo("#arch-nfr", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 6.2);
+
+          // data packets, one pass per wire, in execution order
+          const P0 = 6.6, STEP = 0.45, SPEED = 800;
+          W.forEach((w) => {
+            const pts = w.pts, travel = Math.min(1.5, Math.max(0.35, w.len / SPEED));
+            const start = P0 + w.step * STEP;
+            const c = el("circle", { r: 8, cx: pts[0][0], cy: pts[0][1], fill: COL[w.c], opacity: 0 });
+            const kf = [];
+            for (let i = 1; i < pts.length; i++) {
+              const seg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+              kf.push({ attr: { cx: pts[i][0], cy: pts[i][1] }, duration: (travel * seg) / w.len, ease: "none" });
+            }
+            tl.fromTo(c, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.1 }, start);
+            tl.to(c, { keyframes: kf }, start);
+            tl.to(c, { attr: { opacity: 0 }, duration: 0.15 }, start + travel);
+          });
+          // the ladder counts its paths while packets wait at the decision
+          const cnt = { v: 0 };
+          tl.fromTo(counter, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.2 }, P0 + 6 * STEP);
+          tl.to(cnt, { v: 210, duration: 0.9, ease: "none", onUpdate: () => { counter.textContent = "scored " + Math.round(cnt.v) + " / 210"; } }, P0 + 6 * STEP);
+          tl.to(N.dec.shape, { attr: { "stroke-width": 5 }, duration: 0.25, yoyo: true, repeat: 1 }, P0 + 8 * STEP - 0.1);
+
+          // critical path: dim the rest, trace history -> plan
+          const CP = 13.4;
+          const critIds = W.filter((w) => w.crit).map((w) => w.id);
+          const critNodes = ["sales", "prep", "glm", "shrink", "ctrl", "curve", "ladder", "dec", "plan"];
+          const dimSel = [
+            ...W.filter((w) => !w.crit).map((w) => "#w-" + w.id),
+            ...Object.keys(N).filter((k) => !critNodes.includes(k)).map((k) => "#n-" + k),
+            ...W.filter((w) => !w.crit && w.lg).map((w) => "#wl-" + w.id),
+            "#arch-fr-el", "#arch-fr-op",
+          ];
+          tl.to(dimSel, { opacity: 0.22, duration: 0.6, ease: "power2.inOut" }, CP);
+          const traceG = el("g", { id: "arch-trace" });
+          critIds.forEach((id, i) => {
+            const w = wire(id);
+            const tp = el("path", { d: w.path.getAttribute("d"), fill: "none", stroke: "#eef2f6", "stroke-width": 6, "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": w.len + " " + w.len, "stroke-dashoffset": w.len }, traceG);
+            tl.fromTo(tp, { attr: { "stroke-dashoffset": w.len } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.24, ease: "none" }, CP + 0.4 + i * 0.24);
+          });
+          critNodes.forEach((k, i) => tl.to(N[k].shape, { attr: { "stroke-width": 4.5, "stroke-opacity": 1 }, duration: 0.25 }, CP + 0.3 + i * 0.24));
+          tl.fromTo(pill, { attr: { opacity: 0 } }, { attr: { opacity: 1 }, duration: 0.4 }, CP + 0.4);
+          tl.to("#arch-in", { opacity: 0, duration: 0.4, ease: "power2.in" }, D - 0.4);
+          window.__timelines["arch"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
